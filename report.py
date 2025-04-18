@@ -16,7 +16,7 @@ plt.rcParams['axes.titlesize'] = 12
 plt.rcParams['axes.labelsize'] = 10
 
 # Set page config
-st.set_page_config(page_title="Insident Spoorder", layout="wide")
+st.set_page_config(page_title="Insident Verslag", layout="wide")
 
 # Custom CSS for professional styling
 st.markdown("""
@@ -217,7 +217,7 @@ def generate_word_report(df):
     table.style = 'Table Grid'
     for i, col in enumerate(df.columns):
         table.cell(0, i).text = {
-            'Learner_Full_Name': 'Leerling Naam',
+            'Learner_Full_Name': 'Leerder Naam',
             'Class': 'Klas',
             'Teacher': 'Onderwyser',
             'Incident': 'Insident',
@@ -380,7 +380,7 @@ with st.sidebar:
             else:
                 st.error("Vul asseblief alle velde in en voer kommentaar in.")
 
-    st.header("Genereer Leerling Verslag")
+    st.header("Genereer Leerder Verslag")
     with st.container():
         learner_report_name = st.selectbox("Kies Leerling vir Verslag", options=['Kies'] + sorted(incident_log['Learner_Full_Name'].unique()))
         report_period = st.selectbox("Kies Tydperk", options=['Daagliks', 'Weekliks', 'Maandelik', 'Kwartaalliks'])
