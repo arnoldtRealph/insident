@@ -23,15 +23,17 @@ st.set_page_config(page_title="Insident Spoorder", layout="wide")
 def load_learner_data():
     df = pd.read_csv("learner_list.csv")
     df.columns = df.columns.str.strip()
+    # Combine surname and name into Learner_Full_Name, handling missing values
+    df['Learner_Full_Name'] = df['Leerder van'].fillna('') + ' ' + df['Leerner se naam'].fillna('')
+    df['Learner_Full_Name'] = df['Learner_Full_Name'].str.strip()  # Remove extra spaces
     df = df.rename(columns={
-        'Leerner se naam': 'Learner_Name',
         'klasgroep': 'Class',
         'Opvoeder betrokke': 'Teacher',
         'Wat het gebeur': 'Incident',
         'Kategorie': 'Category',
         'Kommentaar': 'Comment'
     })
-    df['Learner_Name'] = df['Learner_Name'].fillna('Onbekend')
+    df['Learner_Full_Name'] = df['Learner_Full_Name'].replace('', 'Onbekend')
     df['Class'] = df['Class'].fillna('Onbekend')
     df['Teacher'] = df['Teacher'].fillna('Onbekend')
     df['Incident'] = df['Incident'].fillna('Onbekend')
@@ -48,6 +50,9 @@ def load_learner_data():
 def load_incident_log():
     try:
         df = pd.read_csv("incident_log.csv")
+        # Check if old column 'Learner_Name' exists and rename to 'Learner_Full_Name'
+        if 'Learner_Name' in df.columns and 'Learner_Full_Name' not in df.columns:
+            df = df.rename(columns={'Learner_Name': 'Learner_Full_Name'})
         df['Category'] = df['Category'].astype(str)
         df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
         # Convert to South African time and remove timezone for storage
@@ -55,20 +60,20 @@ def load_incident_log():
         df['Date'] = df['Date'].dt.tz_localize('UTC').dt.tz_convert(sa_tz).dt.tz_localize(None)
         return df
     except FileNotFoundError:
-        return pd.DataFrame(columns=['Learner_Name', 'Class', 'Teacher', 'Incident', 'Category', 'Comment', 'Date'])
+        return pd.DataFrame(columns=['Learner_Full_Name', 'Class', 'Teacher', 'Incident', 'Category', 'Comment', 'Date'])
 
 # Save incident to log
-def save_incident(learner_name, class_, teacher, incident, category, comment):
+def save_incident(learner_full_name, class_, teacher, incident, category, comment):
     incident_log = load_incident_log()
     sa_tz = pytz.timezone('Africa/Johannesburg')
     new_incident = pd.DataFrame({
-        'Learner_Name': [learner_name],
+        'Learner_Full_Name': [learner_full_name],
         'Class': [class_],
         'Teacher': [teacher],
         'Incident': [incident],
         'Category': [category],
         'Comment': [comment],
-        'Date': [datetime.now(sa_tz).replace(tzinfo=None)]  # Store without timezone
+        'Date': [datetime.now(sa_tz).replace(tzinfo=None)]
     })
     incident_log = pd.concat([incident_log, new_incident], ignore_index=True)
     incident_log.to_csv("incident_log.csv", index=False)
@@ -83,7 +88,7 @@ def clear_incident(index):
         return incident_log
     return incident_log
 
-# Generate Word document (original function)
+# Generate Word document
 def generate_word_report(df):
     doc = Document()
     doc.add_heading('Insident Verslag', 0)
@@ -94,7 +99,7 @@ def generate_word_report(df):
     table.style = 'Table Grid'
     for i, col in enumerate(df.columns):
         table.cell(0, i).text = {
-            'Learner_Name': 'Leerling Naam',
+            'Learner_Full_Name': 'Leerling Naam',
             'Class': 'Klas',
             'Teacher': 'Onderwyser',
             'Incident': 'Insident',
@@ -106,7 +111,7 @@ def generate_word_report(df):
         cells = table.add_row().cells
         for i, col in enumerate(df.columns):
             if col == 'Date':
-                cells[i].text = row[col].strftime("%Y-%m-%d %H:%M:%S")  # Clean format
+                cells[i].text = row[col].strftime("%Y-%m-%d %H:%M:%S")
             else:
                 cells[i].text = str(row[col])
 
@@ -186,9 +191,9 @@ def generate_word_report(df):
     return doc_stream
 
 # Generate learner-specific Word report
-def generate_learner_report(df, learner_name, period, start_date, end_date):
+def generate_learner_report(df, learner_full_name, period, start_date, end_date):
     doc = Document()
-    doc.add_heading(f'Insident Verslag vir {learner_name}', 0)
+    doc.add_heading(f'Insident Verslag vir {learner_full_name}', 0)
     doc.add_paragraph(f'Tydperk: {period}')
     doc.add_paragraph(f'Datum Reeks: {start_date.strftime("%Y-%m-%d")} tot {end_date.strftime("%Y-%m-%d")}')
 
@@ -198,7 +203,7 @@ def generate_learner_report(df, learner_name, period, start_date, end_date):
     table.style = 'Table Grid'
     for i, col in enumerate(df.columns):
         table.cell(0, i).text = {
-            'Learner_Name': 'Leerling Naam',
+            'Learner_Full_Name': 'Leerling Naam',
             'Class': 'Klas',
             'Teacher': 'Onderwyser',
             'Incident': 'Insident',
@@ -210,7 +215,7 @@ def generate_learner_report(df, learner_name, period, start_date, end_date):
         cells = table.add_row().cells
         for i, col in enumerate(df.columns):
             if col == 'Date':
-                cells[i].text = row[col].strftime("%Y-%m-%d %H:%M:%S")  # Clean format
+                cells[i].text = row[col].strftime("%Y-%m-%d %H:%M:%S")
             else:
                 cells[i].text = str(row[col])
 
@@ -242,7 +247,7 @@ incident_log = load_incident_log()
 
 # Sidebar for incident input
 st.sidebar.header("Rapporteer Nuwe Insident")
-learner_name = st.sidebar.selectbox("Leerling Naam", options=['Kies'] + sorted(learner_df['Learner_Name'].unique()))
+learner_full_name = st.sidebar.selectbox("Leerling Naam", options=['Kies'] + sorted(learner_df['Learner_Full_Name'].unique()))
 class_ = st.sidebar.selectbox("Klas", options=['Kies'] + sorted(learner_df['Class'].unique()))
 teacher = st.sidebar.selectbox("Onderwyser", options=['Kies'] + sorted(learner_df['Teacher'].unique()))
 incident = st.sidebar.selectbox("Insident", options=['Kies'] + sorted(learner_df['Incident'].unique()))
@@ -251,15 +256,15 @@ comment = st.sidebar.text_area("Kommentaar", placeholder="Voer insident kommenta
 
 # Save button
 if st.sidebar.button("Stoor Insident"):
-    if learner_name != 'Kies' and class_ != 'Kies' and teacher != 'Kies' and incident != 'Kies' and category != 'Kies' and comment:
-        incident_log = save_incident(learner_name, class_, teacher, incident, category, comment)
+    if learner_full_name != 'Kies' and class_ != 'Kies' and teacher != 'Kies' and incident != 'Kies' and category != 'Kies' and comment:
+        incident_log = save_incident(learner_full_name, class_, teacher, incident, category, comment)
         st.sidebar.success("Insident suksesvol gestoor!")
     else:
         st.sidebar.error("Vul asseblief alle velde in en voer kommentaar in.")
 
 # Sidebar for learner-specific report
 st.sidebar.header("Genereer Leerling Verslag")
-learner_report_name = st.sidebar.selectbox("Kies Leerling vir Verslag", options=['Kies'] + sorted(incident_log['Learner_Name'].unique()))
+learner_report_name = st.sidebar.selectbox("Kies Leerling vir Verslag", options=['Kies'] + sorted(incident_log['Learner_Full_Name'].unique()))
 report_period = st.sidebar.selectbox("Kies Tydperk", options=['Daagliks', 'Weekliks', 'Maandelik', 'Kwartaalliks'])
 
 # Calculate date range based on period
@@ -291,7 +296,7 @@ st.sidebar.write(f"Verslag Datum Reeks: {start_date.strftime('%Y-%m-%d')} tot {e
 if st.sidebar.button("Genereer Leerling Verslag"):
     if learner_report_name != 'Kies':
         learner_incidents = incident_log[
-            (incident_log['Learner_Name'] == learner_report_name) &
+            (incident_log['Learner_Full_Name'] == learner_report_name) &
             (incident_log['Date'] >= start_date) &
             (incident_log['Date'] <= end_date)
         ]
@@ -370,7 +375,7 @@ if not today_incidents.empty:
     st.pyplot(fig)
     plt.close()
 
-    # Bar chart: Infidents by Class
+    # Bar chart: Incidents by Class
     st.write("Insidente volgens Klas")
     fig, ax = plt.subplots(figsize=(6, 3))
     today_incidents['Class'].value_counts().plot(kind='bar', ax=ax, color=sns.color_palette('muted')[3])
@@ -388,14 +393,14 @@ tab1, tab2, tab3, tab4 = st.tabs(["Gefiltreerde Data", "Weeklikse Opsomming", "M
 
 with tab1:
     st.subheader("Gefiltreerde Data")
-    filter_learner = st.selectbox("Filter Leerling Naam", options=['Alle'] + sorted(incident_log['Learner_Name'].unique()))
+    filter_learner = st.selectbox("Filter Leerling Naam", options=['Alle'] + sorted(incident_log['Learner_Full_Name'].unique()))
     filter_class = st.selectbox("Filter Klas", options=['Alle'] + sorted(incident_log['Class'].unique()))
     filter_teacher = st.selectbox("Filter Onderwyser", options=['Alle'] + sorted(incident_log['Teacher'].unique()))
     filter_incident = st.selectbox("Filter Insident", options=['Alle'] + sorted(incident_log['Incident'].unique()))
     filter_category = st.selectbox("Filter Kategorie", options=['Alle'] + sorted(incident_log['Category'].unique(), key=lambda x: str(x)))
     filtered_df = incident_log.copy()
     if filter_learner != 'Alle':
-        filtered_df = filtered_df[filtered_df['Learner_Name'] == filter_learner]
+        filtered_df = filtered_df[filtered_df['Learner_Full_Name'] == filter_learner]
     if filter_class != 'Alle':
         filtered_df = filtered_df[filtered_df['Class'] == filter_class]
     if filter_teacher != 'Alle':
