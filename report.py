@@ -16,7 +16,7 @@ plt.rcParams['axes.titlesize'] = 12
 plt.rcParams['axes.labelsize'] = 10
 
 # Set page config
-st.set_page_config(page_title="Insident Spoorder", layout="wide")
+st.set_page_config(page_title="Insident Verslag", layout="wide")
 
 # Load and preprocess learner data
 @st.cache_data
