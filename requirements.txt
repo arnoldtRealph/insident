@@ -1,7 +1,8 @@
 streamlit
 pandas
-openpyxl
 numpy
 python-docx
 matplotlib
 seaborn
+pillow
+pytz
