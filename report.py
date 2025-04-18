@@ -37,7 +37,8 @@ def load_learner_data():
     df['Class'] = df['Class'].fillna('Onbekend')
     df['Teacher'] = df['Teacher'].fillna('Onbekend')
     df['Incident'] = df['Incident'].fillna('Onbekend')
-    df['Category'] = df['Category'].astype(str).fillna('Onbekend')
+    # Convert Category to integer, handle non-numeric as 'Onbekend'
+    df['Category'] = pd.to_numeric(df['Category'], errors='coerce').fillna(0).astype(int).astype(str)
     df['Comment'] = df['Comment'].fillna('Geen Kommentaar')
     # Add mock date for existing data
     np.random.seed(42)
@@ -53,7 +54,8 @@ def load_incident_log():
         # Check if old column 'Learner_Name' exists and rename to 'Learner_Full_Name'
         if 'Learner_Name' in df.columns and 'Learner_Full_Name' not in df.columns:
             df = df.rename(columns={'Learner_Name': 'Learner_Full_Name'})
-        df['Category'] = df['Category'].astype(str)
+        # Convert Category to integer, handle non-numeric as 0
+        df['Category'] = pd.to_numeric(df['Category'], errors='coerce').fillna(0).astype(int).astype(str)
         df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
         # Convert to South African time and remove timezone for storage
         sa_tz = pytz.timezone('Africa/Johannesburg')
@@ -66,6 +68,11 @@ def load_incident_log():
 def save_incident(learner_full_name, class_, teacher, incident, category, comment):
     incident_log = load_incident_log()
     sa_tz = pytz.timezone('Africa/Johannesburg')
+    # Ensure category is an integer string (e.g., '1' instead of '1.0')
+    try:
+        category = str(int(float(category)))
+    except ValueError:
+        category = '0'
     new_incident = pd.DataFrame({
         'Learner_Full_Name': [learner_full_name],
         'Class': [class_],
@@ -318,22 +325,79 @@ if st.sidebar.button("Genereer Leerling Verslag"):
 st.title("HOËRSKOOL SAUL DAMON")
 st.subheader("INSIDENT VERSLAG")
 
-# Incident Log
+# Incident Log with Pagination and Scrollbar
 st.subheader("Insident Log")
-st.dataframe(incident_log)
+
 if not incident_log.empty:
+    # Pagination settings
+    rows_per_page = 10
+    total_rows = len(incident_log)
+    total_pages = (total_rows + rows_per_page - 1) // rows_per_page  # Ceiling division
+
+    # Store current page in session state
+    if 'incident_log_page' not in st.session_state:
+        st.session_state.incident_log_page = 1
+
+    # Page navigation
+    col1, col2, col3 = st.columns([2, 3, 2])
+    with col1:
+        if st.button("Vorige", disabled=(st.session_state.incident_log_page == 1)):
+            st.session_state.incident_log_page -= 1
+    with col2:
+        page_options = list(range(1, total_pages + 1))
+        st.session_state.incident_log_page = st.selectbox(
+            "Bladsy",
+            options=page_options,
+            index=st.session_state.incident_log_page - 1,
+            key="incident_log_page_select"
+        )
+    with col3:
+        if st.button("Volgende", disabled=(st.session_state.incident_log_page == total_pages)):
+            st.session_state.incident_log_page += 1
+
+    # Calculate start and end indices for the current page
+    start_idx = (st.session_state.incident_log_page - 1) * rows_per_page
+    end_idx = min(start_idx + rows_per_page, total_rows)
+
+    # Create a display DataFrame with one-based index
+    display_df = incident_log.iloc[start_idx:end_idx].copy()
+    display_df.index = range(start_idx + 1, min(end_idx + 1, total_rows + 1))
+
+    # Display paginated data with scrollbar
+    st.dataframe(
+        display_df,
+        height=300,  # Fixed height for scrollbar
+        use_container_width=True
+    )
+    st.write(f"Wys {start_idx + 1} tot {end_idx} van {total_rows} insidente")
+
+    # Download full report
     st.download_button(
         label="Laai Verslag af as Word",
         data=generate_word_report(incident_log),
         file_name="insident_verslag.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
+
+    # Delete incident with one-based index
     st.write("Verwyder 'n Insident")
-    incident_index = st.selectbox("Kies Insident om te Verwyder (deur Indeks)", options=incident_log.index)
+    one_based_indices = list(range(1, total_rows + 1))
+    selected_display_index = st.selectbox("Kies Insident om te Verwyder (deur Indeks)", options=one_based_indices)
     if st.button("Verwyder Insident"):
-        incident_log = clear_incident(incident_index)
-        st.success(f"Insident {incident_index} suksesvol verwyder!")
+        # Convert one-based display index to zero-based DataFrame index
+        zero_based_index = selected_display_index - 1
+        incident_log = clear_incident(zero_based_index)
+        st.success(f"Insident {selected_display_index} suksesvol verwyder!")
+        # Adjust page if necessary after deletion
+        total_rows = len(incident_log)
+        total_pages = (total_rows + rows_per_page - 1) // rows_per_page
+        if st.session_state.incident_log_page > total_pages and total_pages > 0:
+            st.session_state.incident_log_page = total_pages
+        elif total_pages == 0:
+            st.session_state.incident_log_page = 1
         st.rerun()
+else:
+    st.write("Geen insidente in die log nie.")
 
 # Daily incident charts
 st.subheader("Vandag se Insidente")
