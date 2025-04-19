@@ -16,9 +16,9 @@ plt.rcParams['axes.titlesize'] = 12
 plt.rcParams['axes.labelsize'] = 10
 
 # Set page config
-st.set_page_config(page_title="Insident Verslag", layout="wide")
+st.set_page_config(page_title="Insident Spoorder", layout="wide")
 
-# Custom CSS for professional styling
+# Custom CSS for professional styling and dark mode compatibility
 st.markdown("""
     <style>
         /* General layout */
@@ -26,11 +26,35 @@ st.markdown("""
             background-color: #f8f9fa;
             font-family: 'Arial', sans-serif;
         }
+        [data-baseweb="baseweb"] {
+            background-color: #f8f9fa !important; /* Light mode background */
+        }
+        /* Dark mode adjustments */
+        [data-theme="dark"] .stApp, [data-theme="dark"] [data-baseweb="baseweb"] {
+            background-color: #212529 !important;
+        }
+        [data-theme="dark"] .main .block-container {
+            background-color: #343a40 !important;
+            color: #f8f9fa !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        [data-theme="dark"] .sidebar .sidebar-content {
+            background-color: #2c3034 !important;
+            color: #f8f9fa !important;
+            border-right: 1px solid #495057;
+        }
+        [data-theme="dark"] .stMarkdown, [data-theme="dark"] .stText, [data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3 {
+            color: #f8f9fa !important;
+        }
+
+        /* Sidebar */
         .sidebar .sidebar-content {
             background-color: #e9ecef;
             padding: 20px;
             border-right: 1px solid #dee2e6;
         }
+
+        /* Main content */
         .main .block-container {
             padding: 30px;
             background-color: #ffffff;
@@ -59,10 +83,21 @@ st.markdown("""
             font-weight: 500;
         }
 
+        /* Input labels */
+        .input-label {
+            color: #495057;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        [data-theme="dark"] .input-label {
+            color: #f8f9fa !important;
+        }
+
         /* Buttons */
         .stButton>button {
             background-color: #28a745;
-            color: white;
+            color: #ffffff !important;
             border: none;
             border-radius: 4px;
             padding: 10px 20px;
@@ -72,11 +107,39 @@ st.markdown("""
         }
         .stButton>button:hover {
             background-color: #218838;
-            color: white;
+            color: #ffffff !important;
+        }
+        .stButton>button:active {
+            background-color: #1e7e34;
+            color: #ffffff !important;
         }
         .stButton>button:disabled {
             background-color: #6c757d;
-            color: #d3d3d3;
+            color: #d3d3d3 !important;
+        }
+
+        /* Download button */
+        .stDownloadButton>button {
+            background-color: #007bff;
+            color: #ffffff !important;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        .stDownloadButton>button:hover {
+            background-color: #0056b3;
+            color: #ffffff !important;
+        }
+        .stDownloadButton>button:active {
+            background-color: #004085;
+            color: #ffffff !important;
+        }
+        .stDownloadButton>button:disabled {
+            background-color: #6c757d;
+            color: #d3d3d3 !important;
         }
 
         /* Dataframe styling */
@@ -96,15 +159,30 @@ st.markdown("""
             padding: 10px;
             text-align: left;
         }
+        [data-theme="dark"] .stDataFrame th {
+            background-color: #495057;
+            color: #f8f9fa;
+        }
         .stDataFrame td {
             padding: 10px;
             border-bottom: 1px solid #dee2e6;
+            color: #343a40;
+        }
+        [data-theme="dark"] .stDataFrame td {
+            color: #f8f9fa;
+            border-bottom: 1px solid #495057;
         }
         .stDataFrame tr:nth-child(even) {
             background-color: #f8f9fa;
         }
+        [data-theme="dark"] .stDataFrame tr:nth-child(even) {
+            background-color: #343a40;
+        }
         .stDataFrame tr:hover {
             background-color: #e9ecef;
+        }
+        [data-theme="dark"] .stDataFrame tr:hover {
+            background-color: #495057;
         }
 
         /* Sidebar inputs */
@@ -114,14 +192,24 @@ st.markdown("""
             border-radius: 4px;
             padding: 5px;
         }
+        [data-theme="dark"] .stSelectbox, [data-theme="dark"] .stTextArea {
+            background-color: #343a40;
+            border: 1px solid #6c757d;
+            color: #f8f9fa;
+        }
         .stSelectbox:hover, .stTextArea:hover {
+            border-color: #28a745;
+        }
+        [data-theme="dark"] .stSelectbox:hover, [data-theme="dark"] .stTextArea:hover {
             border-color: #28a745;
         }
 
         /* Text and labels */
         .stMarkdown, .stText {
             color: #495057;
-            font-size: 1rem;
+        }
+        [data-theme="dark"] .stMarkdown, [data-theme="dark"] .stText {
+            color: #f8f9fa;
         }
         .stAlert {
             border-radius: 4px;
@@ -148,8 +236,8 @@ def load_learner_data():
     df['Class'] = df['Class'].fillna('Onbekend')
     df['Teacher'] = df['Teacher'].fillna('Onbekend')
     df['Incident'] = df['Incident'].fillna('Onbekend')
-    # Convert Category to integer, handle non-numeric as 'Onbekend'
-    df['Category'] = pd.to_numeric(df['Category'], errors='coerce').fillna(0).astype(int).astype(str)
+    # Convert Category to integer, handle non-numeric as 1
+    df['Category'] = pd.to_numeric(df['Category'], errors='coerce').fillna(1).astype(int).astype(str)
     df['Comment'] = df['Comment'].fillna('Geen Kommentaar')
     # Add mock date for existing data
     np.random.seed(42)
@@ -165,8 +253,8 @@ def load_incident_log():
         # Check if old column 'Learner_Name' exists and rename to 'Learner_Full_Name'
         if 'Learner_Name' in df.columns and 'Learner_Full_Name' not in df.columns:
             df = df.rename(columns={'Learner_Name': 'Learner_Full_Name'})
-        # Convert Category to integer, handle non-numeric as 0
-        df['Category'] = pd.to_numeric(df['Category'], errors='coerce').fillna(0).astype(int).astype(str)
+        # Convert Category to integer, handle non-numeric as 1
+        df['Category'] = pd.to_numeric(df['Category'], errors='coerce').fillna(1).astype(int).astype(str)
         df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
         # Convert to South African time and remove timezone for storage
         sa_tz = pytz.timezone('Africa/Johannesburg')
@@ -179,11 +267,11 @@ def load_incident_log():
 def save_incident(learner_full_name, class_, teacher, incident, category, comment):
     incident_log = load_incident_log()
     sa_tz = pytz.timezone('Africa/Johannesburg')
-    # Ensure category is an integer string (e.g., '1' instead of '1.0')
+    # Ensure category is an integer string, default to 1 if invalid
     try:
         category = str(int(float(category)))
     except ValueError:
-        category = '0'
+        category = '1'
     new_incident = pd.DataFrame({
         'Learner_Full_Name': [learner_full_name],
         'Class': [class_],
@@ -321,7 +409,7 @@ def generate_learner_report(df, learner_full_name, period, start_date, end_date)
     table.style = 'Table Grid'
     for i, col in enumerate(df.columns):
         table.cell(0, i).text = {
-            'Learner_Full_Name': 'Leerling Naam',
+            'Learner_Full_Name': 'Leerder Naam',
             'Class': 'Klas',
             'Teacher': 'Onderwyser',
             'Incident': 'Insident',
@@ -367,12 +455,24 @@ incident_log = load_incident_log()
 with st.sidebar:
     st.header("Rapporteer Nuwe Insident")
     with st.container():
-        learner_full_name = st.selectbox("Leerling Naam", options=['Kies'] + sorted(learner_df['Learner_Full_Name'].unique()))
-        class_ = st.selectbox("Klas", options=['Kies'] + sorted(learner_df['Class'].unique()))
-        teacher = st.selectbox("Onderwyser", options=['Kies'] + sorted(learner_df['Teacher'].unique()))
-        incident = st.selectbox("Insident", options=['Kies'] + sorted(learner_df['Incident'].unique()))
-        category = st.selectbox("Kategorie", options=['Kies'] + sorted(learner_df['Category'].unique(), key=lambda x: str(x)))
-        comment = st.text_area("Kommentaar", placeholder="Voer insident kommentaar in")
+        st.markdown('<div class="input-label">Leerder Naam</div>', unsafe_allow_html=True)
+        learner_full_name = st.selectbox("", options=['Kies'] + sorted(learner_df['Learner_Full_Name'].unique()), key="learner_full_name")
+        
+        st.markdown('<div class="input-label">Klas</div>', unsafe_allow_html=True)
+        class_ = st.selectbox("", options=['Kies'] + sorted(learner_df['Class'].unique()), key="class")
+        
+        st.markdown('<div class="input-label">Onderwyser</div>', unsafe_allow_html=True)
+        teacher = st.selectbox("", options=['Kies'] + sorted(learner_df['Teacher'].unique()), key="teacher")
+        
+        st.markdown('<div class="input-label">Insident</div>', unsafe_allow_html=True)
+        incident = st.selectbox("", options=['Kies'] + sorted(learner_df['Incident'].unique()), key="incident")
+        
+        st.markdown('<div class="input-label">Kategorie</div>', unsafe_allow_html=True)
+        category = st.selectbox("", options=['Kies'] + sorted(learner_df['Category'].unique(), key=lambda x: int(x)), key="category")
+        
+        st.markdown('<div class="input-label">Kommentaar</div>', unsafe_allow_html=True)
+        comment = st.text_area("", placeholder="Tik hier...", key="comment")
+        
         if st.button("Stoor Insident"):
             if learner_full_name != 'Kies' and class_ != 'Kies' and teacher != 'Kies' and incident != 'Kies' and category != 'Kies' and comment:
                 incident_log = save_incident(learner_full_name, class_, teacher, incident, category, comment)
@@ -382,8 +482,11 @@ with st.sidebar:
 
     st.header("Genereer Leerder Verslag")
     with st.container():
-        learner_report_name = st.selectbox("Kies Leerling vir Verslag", options=['Kies'] + sorted(incident_log['Learner_Full_Name'].unique()))
-        report_period = st.selectbox("Kies Tydperk", options=['Daagliks', 'Weekliks', 'Maandelik', 'Kwartaalliks'])
+        st.markdown('<div class="input-label">Kies Leerder vir Verslag</div>', unsafe_allow_html=True)
+        learner_report_name = st.selectbox("", options=['Kies'] + sorted(incident_log['Learner_Full_Name'].unique()), key="learner_report_name")
+        
+        st.markdown('<div class="input-label">Kies Tydperk</div>', unsafe_allow_html=True)
+        report_period = st.selectbox("", options=['Daagliks', 'Weekliks', 'Maandelik', 'Kwartaalliks'], key="report_period")
 
         # Calculate date range based on period
         sa_tz = pytz.timezone('Africa/Johannesburg')
@@ -410,7 +513,7 @@ with st.sidebar:
         # Display date range
         st.write(f"Verslag Datum Reeks: {start_date.strftime('%Y-%m-%d')} tot {end_date.strftime('%Y-%m-%d')}")
 
-        if st.button("Genereer Leerling Verslag"):
+        if st.button("Genereer Leerder Verslag"):
             if learner_report_name != 'Kies':
                 learner_incidents = incident_log[
                     (incident_log['Learner_Full_Name'] == learner_report_name) &
@@ -421,7 +524,7 @@ with st.sidebar:
                     report_stream = generate_learner_report(learner_incidents, learner_report_name, report_period, start_date, end_date)
                     st.success(f"Verslag vir {learner_report_name} suksesvol gegenereer!")
                     st.download_button(
-                        label="Laai Leerling Verslag af",
+                        label="Laai Leerder Verslag af",
                         data=report_stream,
                         file_name=f"insident_verslag_{learner_report_name}_{report_period.lower()}.docx",
                         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -429,7 +532,7 @@ with st.sidebar:
                 else:
                     st.error(f"Geen insidente gevind vir {learner_report_name} in die geselekteerde tydperk.")
             else:
-                st.error("Kies asseblief 'n leerling.")
+                st.error("Kies asseblief 'n leerder.")
 
 # Main content
 with st.container():
@@ -476,10 +579,10 @@ with st.container():
         # Display paginated data with scrollbar and column config
         st.dataframe(
             display_df,
-            height=300,
+            height=400,  # Increased height for larger table
             use_container_width=True,
             column_config={
-                "Learner_Full_Name": st.column_config.TextColumn("Leerling Naam", width="medium"),
+                "Learner_Full_Name": st.column_config.TextColumn("Leerder Naam", width="medium"),
                 "Class": st.column_config.TextColumn("Klas", width="small"),
                 "Teacher": st.column_config.TextColumn("Onderwyser", width="medium"),
                 "Incident": st.column_config.TextColumn("Insident", width="medium"),
@@ -501,7 +604,8 @@ with st.container():
         # Delete incident with one-based index
         st.write("Verwyder 'n Insident")
         one_based_indices = list(range(1, total_rows + 1))
-        selected_display_index = st.selectbox("Kies Insident om te Verwyder (deur Indeks)", options=one_based_indices)
+        st.markdown('<div class="input-label">Kies Insident om te Verwyder (deur Indeks)</div>', unsafe_allow_html=True)
+        selected_display_index = st.selectbox("", options=one_based_indices, key="delete_index")
         if st.button("Verwyder Insident"):
             # Convert one-based display index to zero-based DataFrame index
             zero_based_index = selected_display_index - 1
@@ -576,11 +680,21 @@ with st.container():
 
     with tab1:
         st.subheader("Gefiltreerde Data")
-        filter_learner = st.selectbox("Filter Leerling Naam", options=['Alle'] + sorted(incident_log['Learner_Full_Name'].unique()))
-        filter_class = st.selectbox("Filter Klas", options=['Alle'] + sorted(incident_log['Class'].unique()))
-        filter_teacher = st.selectbox("Filter Onderwyser", options=['Alle'] + sorted(incident_log['Teacher'].unique()))
-        filter_incident = st.selectbox("Filter Insident", options=['Alle'] + sorted(incident_log['Incident'].unique()))
-        filter_category = st.selectbox("Filter Kategorie", options=['Alle'] + sorted(incident_log['Category'].unique(), key=lambda x: str(x)))
+        st.markdown('<div class="input-label">Filter Leerder Naam</div>', unsafe_allow_html=True)
+        filter_learner = st.selectbox("", options=['Alle'] + sorted(incident_log['Learner_Full_Name'].unique()), key="filter_learner")
+        
+        st.markdown('<div class="input-label">Filter Klas</div>', unsafe_allow_html=True)
+        filter_class = st.selectbox("", options=['Alle'] + sorted(incident_log['Class'].unique()), key="filter_class")
+        
+        st.markdown('<div class="input-label">Filter Onderwyser</div>', unsafe_allow_html=True)
+        filter_teacher = st.selectbox("", options=['Alle'] + sorted(incident_log['Teacher'].unique()), key="filter_teacher")
+        
+        st.markdown('<div class="input-label">Filter Insident</div>', unsafe_allow_html=True)
+        filter_incident = st.selectbox("", options=['Alle'] + sorted(incident_log['Incident'].unique()), key="filter_incident")
+        
+        st.markdown('<div class="input-label">Filter Kategorie</div>', unsafe_allow_html=True)
+        filter_category = st.selectbox("", options=['Alle'] + sorted(incident_log['Category'].unique(), key=lambda x: int(x)), key="filter_category")
+        
         filtered_df = incident_log.copy()
         if filter_learner != 'Alle':
             filtered_df = filtered_df[filtered_df['Learner_Full_Name'] == filter_learner]
@@ -596,7 +710,7 @@ with st.container():
             filtered_df,
             use_container_width=True,
             column_config={
-                "Learner_Full_Name": st.column_config.TextColumn("Leerling Naam", width="medium"),
+                "Learner_Full_Name": st.column_config.TextColumn("Leerder Naam", width="medium"),
                 "Class": st.column_config.TextColumn("Klas", width="small"),
                 "Teacher": st.column_config.TextColumn("Onderwyser", width="medium"),
                 "Incident": st.column_config.TextColumn("Insident", width="medium"),
