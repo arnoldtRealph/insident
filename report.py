@@ -13,11 +13,15 @@ import uuid
 
 # Set seaborn style for professional charts
 sns.set_style("whitegrid")
-plt.rcParams['font.size'] = 10
-plt.rcParams['axes.titlesize'] = 12
-plt.rcParams['axes.labelsize'] = 10
-plt.rcParams['xtick.labelsize'] = 9
-plt.rcParams['ytick.labelsize'] = 9
+plt.rcParams['font.family'] = 'Roboto'
+plt.rcParams['font.size'] = 12
+plt.rcParams['axes.titlesize'] = 14
+plt.rcParams['axes.labelsize'] = 12
+plt.rcParams['xtick.labelsize'] = 10
+plt.rcParams['ytick.labelsize'] = 10
+plt.rcParams['legend.fontsize'] = 10
+plt.rcParams['axes.titleweight'] = 'bold'
+plt.rcParams['axes.labelweight'] = 'medium'
 
 # Set page config
 st.set_page_config(page_title="Insident Verslag", layout="wide")
@@ -293,7 +297,7 @@ st.markdown("""
                 font-size: 2rem;
             }
             h2 {
-                font-size: 1.5rem;
+                font-size: 1.5 manufacture
             }
             h3 {
                 font-size: 1.2rem;
@@ -400,6 +404,44 @@ def clear_incident(index):
         return incident_log
     return incident_log
 
+# Helper function to create professional bar charts
+def create_bar_chart(data, x, y, title, xlabel, ylabel, rotation=45, figsize=(6, 4)):
+    fig, ax = plt.subplots(figsize=figsize, dpi=150)
+    palette = sns.color_palette("Blues", n_colors=len(data))
+    sns.barplot(x=x, y=y, data=data, ax=ax, palette=palette)
+    ax.set_title(title, pad=15, fontsize=14, weight='bold')
+    ax.set_xlabel(xlabel, fontsize=12, labelpad=10)
+    ax.set_ylabel(ylabel, fontsize=12, labelpad=10)
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+    ax.tick_params(axis='x', rotation=rotation, labelsize=10)
+    ax.tick_params(axis='y', labelsize=10)
+    ax.grid(True, which='major', axis='y', linestyle='--', alpha=0.5)
+    sns.despine(ax=ax, left=True)
+    ax.set_facecolor('#f9fafc')
+    fig.patch.set_facecolor('#ffffff')
+    plt.tight_layout(pad=1.5)
+    img_stream = io.BytesIO()
+    plt.savefig(img_stream, format='png', bbox_inches='tight', dpi=150)
+    plt.close()
+    img_stream.seek(0)
+    return img_stream
+
+# Helper function to create professional pie charts
+def create_pie_chart(data, title, figsize=(5, 5)):
+    fig, ax = plt.subplots(figsize=figsize, dpi=150)
+    data.plot(kind='pie', ax=ax, autopct='%1.1f%%', colors=sns.color_palette('Blues', len(data)),
+              textprops={'fontsize': 10, 'weight': 'medium'}, startangle=90)
+    ax.set_title(title, pad=15, fontsize=14, weight='bold')
+    ax.set_ylabel('')
+    ax.set_aspect('equal')
+    fig.patch.set_facecolor('#ffffff')
+    plt.tight_layout(pad=1.5)
+    img_stream = io.BytesIO()
+    plt.savefig(img_stream, format='png', bbox_inches='tight', dpi=150)
+    plt.close()
+    img_stream.seek(0)
+    return img_stream
+
 # Generate Word document
 def generate_word_report(df):
     doc = Document()
@@ -429,78 +471,68 @@ def generate_word_report(df):
     doc.add_heading('Insident Analise', level=1)
 
     # Bar chart: Incidents by Category
-    fig, ax = plt.subplots(figsize=(4, 2.5))
-    category_counts = df['Category'].value_counts().sort_index()
-    sns.barplot(x=category_counts.index, y=category_counts.values, ax=ax, palette='Blues')
-    ax.set_title('Insidente volgens Kategorie', pad=10, fontsize=12, weight='bold')
-    ax.set_xlabel('Kategorie', fontsize=10)
-    ax.set_ylabel('Aantal', fontsize=10)
-    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-    ax.tick_params(axis='x', rotation=0, labelsize=9)
-    ax.tick_params(axis='y', labelsize=9)
-    plt.tight_layout(pad=1.0)
-    img_stream = io.BytesIO()
-    plt.savefig(img_stream, format='png', dpi=100, bbox_inches='tight')
-    plt.close()
-    doc.add_picture(img_stream, width=Inches(3.5))
+    category_counts = df['Category'].value_counts().sort_index().reset_index()
+    category_counts.columns = ['Category', 'Count']
+    img_stream = create_bar_chart(
+        data=category_counts,
+        x='Category',
+        y='Count',
+        title='Insidente volgens Kategorie',
+        xlabel='Kategorie',
+        ylabel='Aantal',
+        rotation=0
+    )
+    doc.add_picture(img_stream, width=Inches(4.5))
 
     # Bar chart: Incidents by Incident Type
-    fig, ax = plt.subplots(figsize=(4, 2.5))
-    incident_counts = df['Incident'].value_counts()
-    sns.barplot(x=incident_counts.index, y=incident_counts.values, ax=ax, palette='Blues')
-    ax.set_title('Insidente volgens Tipe', pad=10, fontsize=12, weight='bold')
-    ax.set_xlabel('Insident', fontsize=10)
-    ax.set_ylabel('Aantal', fontsize=10)
-    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-    ax.tick_params(axis='x', rotation=45, labelsize=9)
-    ax.tick_params(axis='y', labelsize=9)
-    plt.tight_layout(pad=1.0)
-    img_stream = io.BytesIO()
-    plt.savefig(img_stream, format='png', dpi=100, bbox_inches='tight')
-    plt.close()
-    doc.add_picture(img_stream, width=Inches(3.5))
+    incident_counts = df['Incident'].value_counts().reset_index()
+    incident_counts.columns = ['Incident', 'Count']
+    img_stream = create_bar_chart(
+        data=incident_counts,
+        x='Incident',
+        y='Count',
+        title='Insidente volgens Tipe',
+        xlabel='Insident',
+        ylabel='Aantal',
+        rotation=45
+    )
+    doc.add_picture(img_stream, width=Inches(4.5))
 
     # Bar chart: Incidents by Teacher
-    fig, ax = plt.subplots(figsize=(4, 2.5))
-    teacher_counts = df['Teacher'].value_counts()
-    sns.barplot(x=teacher_counts.index, y=teacher_counts.values, ax=ax, palette='Blues')
-    ax.set_title('Insidente volgens Rapporterende Onderwyser', pad=10, fontsize=12, weight='bold')
-    ax.set_xlabel('Onderwyser', fontsize=10)
-    ax.set_ylabel('Aantal', fontsize=10)
-    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-    ax.tick_params(axis='x', rotation=45, labelsize=9)
-    ax.tick_params(axis='y', labelsize=9)
-    plt.tight_layout(pad=1.0)
-    img_stream = io.BytesIO()
-    plt.savefig(img_stream, format='png', dpi=100, bbox_inches='tight')
-    plt.close()
-    doc.add_picture(img_stream, width=Inches(3.5))
+    teacher_counts = df['Teacher'].value_counts().reset_index()
+    teacher_counts.columns = ['Teacher', 'Count']
+    img_stream = create_bar_chart(
+        data=teacher_counts,
+        x='Teacher',
+        y='Count',
+        title='Insidente volgens Rapporterende Onderwyser',
+        xlabel='Onderwyser',
+        ylabel='Aantal',
+        rotation=45
+    )
+    doc.add_picture(img_stream, width=Inches(4.5))
 
     # Bar chart: Incidents by Class
-    fig, ax = plt.subplots(figsize=(4, 2.5))
-    class_counts = df['Class'].value_counts()
-    sns.barplot(x=class_counts.index, y=class_counts.values, ax=ax, palette='Blues')
-    ax.set_title('Insidente volgens Klas', pad=10, fontsize=12, weight='bold')
-    ax.set_xlabel('Klas', fontsize=10)
-    ax.set_ylabel('Aantal', fontsize=10)
-    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-    ax.tick_params(axis='x', rotation=45, labelsize=9)
-    ax.tick_params(axis='y', labelsize=9)
-    plt.tight_layout(pad=1.0)
-    img_stream = io.BytesIO()
-    plt.savefig(img_stream, format='png', dpi=100, bbox_inches='tight')
-    plt.close()
-    doc.add_picture(img_stream, width=Inches(3.5))
+    class_counts = df['Class'].value_counts().reset_index()
+    class_counts.columns = ['Class', 'Count']
+    img_stream = create_bar_chart(
+        data=class_counts,
+        x='Class',
+        y='Count',
+        title='Insidente volgens Klas',
+        xlabel='Klas',
+        ylabel='Aantal',
+        rotation=45
+    )
+    doc.add_picture(img_stream, width=Inches(4.5))
 
     # Pie chart: Incident Distribution
-    fig, ax = plt.subplots(figsize=(4, 2.5))
-    category_counts.plot(kind='pie', ax=ax, autopct='%1.1f%%', colors=sns.color_palette('Blues'), textprops={'fontsize': 9})
-    ax.set_title('Insident Verspreiding volgens Kategorie', pad=10, fontsize=12, weight='bold')
-    plt.tight_layout(pad=1.0)
-    img_stream = io.BytesIO()
-    plt.savefig(img_stream, format='png', dpi=100, bbox_inches='tight')
-    plt.close()
-    doc.add_picture(img_stream, width=Inches(3.5))
+    category_counts = df['Category'].value_counts()
+    img_stream = create_pie_chart(
+        data=category_counts,
+        title='Insident Verspreiding volgens Kategorie'
+    )
+    doc.add_picture(img_stream, width=Inches(4.5))
 
     doc_stream = io.BytesIO()
     doc.save(doc_stream)
@@ -537,20 +569,18 @@ def generate_learner_report(df, learner_full_name, period, start_date, end_date)
 
     if not df.empty:
         doc.add_heading('Insident Analise', level=1)
-        fig, ax = plt.subplots(figsize=(4, 2.5))
-        category_counts = df['Category'].value_counts().sort_index()
-        sns.barplot(x=category_counts.index, y=category_counts.values, ax=ax, palette='Blues')
-        ax.set_title('Insidente volgens Kategorie', pad=10, fontsize=12, weight='bold')
-        ax.set_xlabel('Kategorie', fontsize=10)
-        ax.set_ylabel('Aantal', fontsize=10)
-        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-        ax.tick_params(axis='x', rotation=0, labelsize=9)
-        ax.tick_params(axis='y', labelsize=9)
-        plt.tight_layout(pad=1.0)
-        img_stream = io.BytesIO()
-        plt.savefig(img_stream, format='png', dpi=100, bbox_inches='tight')
-        plt.close()
-        doc.add_picture(img_stream, width=Inches(3.5))
+        category_counts = df['Category'].value_counts().sort_index().reset_index()
+        category_counts.columns = ['Category', 'Count']
+        img_stream = create_bar_chart(
+            data=category_counts,
+            x='Category',
+            y='Count',
+            title='Insidente volgens Kategorie',
+            xlabel='Kategorie',
+            ylabel='Aantal',
+            rotation=0
+        )
+        doc.add_picture(img_stream, width=Inches(4.5))
 
     doc_stream = io.BytesIO()
     doc.save(doc_stream)
@@ -655,7 +685,6 @@ with st.container():
         if 'incident_log_page' not in st.session_state:
             st.session_state.incident_log_page = 1
 
-        # Use a form to handle pagination buttons
         with st.form(key="pagination_form"):
             col1, col2, col3 = st.columns([1, 2, 1])
             with col1:
@@ -676,15 +705,12 @@ with st.container():
                 st.session_state.incident_log_page = selected_page
                 st.rerun()
 
-        # Calculate indices
         start_idx = (st.session_state.incident_log_page - 1) * rows_per_page
         end_idx = min(start_idx + rows_per_page, total_rows)
 
-        # Create display DataFrame with one-based index
         display_df = incident_log.iloc[start_idx:end_idx].copy()
         display_df.index = range(start_idx + 1, min(end_idx + 1, total_rows + 1))
 
-        # Display table
         st.dataframe(
             display_df,
             height=300,
@@ -701,7 +727,6 @@ with st.container():
         )
         st.write(f"Wys {start_idx + 1} tot {end_idx} van {total_rows} insidente")
 
-        # Download full report
         st.download_button(
             label="Laai Verslag af as Word",
             data=generate_word_report(incident_log),
@@ -709,7 +734,6 @@ with st.container():
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
 
-        # Delete incident
         st.write("Verwyder 'n Insident")
         one_based_indices = list(range(1, total_rows + 1))
         st.markdown('<div class="input-label">Kies Insident om te Verwyder (deur Indeks)</div>', unsafe_allow_html=True)
@@ -735,58 +759,78 @@ with st.container():
         st.write(f"Totale Insidente Vandag: {len(today_incidents)}")
 
         st.write("Insidente volgens Kategorie")
-        fig, ax = plt.subplots(figsize=(4, 2.5))
-        category_counts = today_incidents['Category'].value_counts().sort_index()
-        sns.barplot(x=category_counts.index, y=category_counts.values, ax=ax, palette='Blues')
-        ax.set_title('Insidente volgens Kategorie (Vandag)', pad=10, fontsize=12, weight='bold')
-        ax.set_xlabel('Kategorie', fontsize=10)
-        ax.set_ylabel('Aantal', fontsize=10)
+        category_counts = today_incidents['Category'].value_counts().sort_index().reset_index()
+        category_counts.columns = ['Category', 'Count']
+        fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
+        sns.barplot(x='Category', y='Count', data=category_counts, ax=ax, palette='Blues')
+        ax.set_title('Insidente volgens Kategorie (Vandag)', pad=15, fontsize=14, weight='bold')
+        ax.set_xlabel('Kategorie', fontsize=12, labelpad=10)
+        ax.set_ylabel('Aantal', fontsize=12, labelpad=10)
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-        ax.tick_params(axis='x', rotation=0, labelsize=9)
-        ax.tick_params(axis='y', labelsize=9)
-        plt.tight_layout(pad=1.0)
+        ax.tick_params(axis='x', rotation=0, labelsize=10)
+        ax.tick_params(axis='y', labelsize=10)
+        ax.grid(True, which='major', axis='y', linestyle='--', alpha=0.5)
+        sns.despine(ax=ax, left=True)
+        ax.set_facecolor('#f9fafc')
+        fig.patch.set_facecolor('#ffffff')
+        plt.tight_layout(pad=1.5)
         st.pyplot(fig)
         plt.close()
 
         st.write("Insidente volgens Tipe")
-        fig, ax = plt.subplots(figsize=(4, 2.5))
-        incident_counts = today_incidents['Incident'].value_counts()
-        sns.barplot(x=incident_counts.index, y=incident_counts.values, ax=ax, palette='Blues')
-        ax.set_title('Insidente volgens Tipe (Vandag)', pad=10, fontsize=12, weight='bold')
-        ax.set_xlabel('Insident', fontsize=10)
-        ax.set_ylabel('Aantal', fontsize=10)
+        incident_counts = today_incidents['Incident'].value_counts().reset_index()
+        incident_counts.columns = ['Incident', 'Count']
+        fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
+        sns.barplot(x='Incident', y='Count', data=incident_counts, ax=ax, palette='Blues')
+        ax.set_title('Insidente volgens Tipe (Vandag)', pad=15, fontsize=14, weight='bold')
+        ax.set_xlabel('Insident', fontsize=12, labelpad=10)
+        ax.set_ylabel('Aantal', fontsize=12, labelpad=10)
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-        ax.tick_params(axis='x', rotation=60, labelsize=9)
-        ax.tick_params(axis='y', labelsize=9)
-        plt.tight_layout(pad=1.0)
+        ax.tick_params(axis='x', rotation=60, labelsize=10)
+        ax.tick_params(axis='y', labelsize=10)
+        ax.grid(True, which='major', axis='y', linestyle='--', alpha=0.5)
+        sns.despine(ax=ax, left=True)
+        ax.set_facecolor('#f9fafc')
+        fig.patch.set_facecolor('#ffffff')
+        plt.tight_layout(pad=1.5)
         st.pyplot(fig)
         plt.close()
 
         st.write("Insidente volgens Rapporterende Onderwyser")
-        fig, ax = plt.subplots(figsize=(4, 2.5))
-        teacher_counts = today_incidents['Teacher'].value_counts()
-        sns.barplot(x=teacher_counts.index, y=teacher_counts.values, ax=ax, palette='Blues')
-        ax.set_title('Insidente volgens Rapporterende Onderwyser (Vandag)', pad=10, fontsize=12, weight='bold')
-        ax.set_xlabel('Onderwyser', fontsize=10)
-        ax.set_ylabel('Aantal', fontsize=10)
+        teacher_counts = today_incidents['Teacher'].value_counts().reset_index()
+        teacher_counts.columns = ['Teacher', 'Count']
+        fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
+        sns.barplot(x='Teacher', y='Count', data=teacher_counts, ax=ax, palette='Blues')
+        ax.set_title('Insidente volgens Rapporterende Onderwyser (Vandag)', pad=15, fontsize=14, weight='bold')
+        ax.set_xlabel('Onderwyser', fontsize=12, labelpad=10)
+        ax.set_ylabel('Aantal', fontsize=12, labelpad=10)
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-        ax.tick_params(axis='x', rotation=60, labelsize=9)
-        ax.tick_params(axis='y', labelsize=9)
-        plt.tight_layout(pad=1.0)
+        ax.tick_params(axis='x', rotation=60, labelsize=10)
+        ax.tick_params(axis='y', labelsize=10)
+        ax.grid(True, which='major', axis='y', linestyle='--', alpha=0.5)
+        sns.despine(ax=ax, left=True)
+        ax.set_facecolor('#f9fafc')
+        fig.patch.set_facecolor('#ffffff')
+        plt.tight_layout(pad=1.5)
         st.pyplot(fig)
         plt.close()
 
         st.write("Insidente volgens Klas")
-        fig, ax = plt.subplots(figsize=(4, 2.5))
-        class_counts = today_incidents['Class'].value_counts()
-        sns.barplot(x=class_counts.index, y=class_counts.values, ax=ax, palette='Blues')
-        ax.set_title('Insidente volgens Klas (Vandag)', pad=10, fontsize=12, weight='bold')
-        ax.set_xlabel('Klas', fontsize=10)
-        ax.set_ylabel('Aantal', fontsize=10)
+        class_counts = today_incidents['Class'].value_counts().reset_index()
+        class_counts.columns = ['Class', 'Count']
+        fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
+        sns.barplot(x='Class', y='Count', data=class_counts, ax=ax, palette='Blues')
+        ax.set_title('Insidente volgens Klas (Vandag)', pad=15, fontsize=14, weight='bold')
+        ax.set_xlabel('Klas', fontsize=12, labelpad=10)
+        ax.set_ylabel('Aantal', fontsize=12, labelpad=10)
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-        ax.tick_params(axis='x', rotation=60, labelsize=9)
-        ax.tick_params(axis='y', labelsize=9)
-        plt.tight_layout(pad=1.0)
+        ax.tick_params(axis='x', rotation=60, labelsize=10)
+        ax.tick_params(axis='y', labelsize=10)
+        ax.grid(True, which='major', axis='y', linestyle='--', alpha=0.5)
+        sns.despine(ax=ax, left=True)
+        ax.set_facecolor('#f9fafc')
+        fig.patch.set_facecolor('#ffffff')
+        plt.tight_layout(pad=1.5)
         st.pyplot(fig)
         plt.close()
     else:
@@ -844,15 +888,20 @@ with st.container():
             weekly_summary = incident_log.groupby([pd.Grouper(key='Date', freq='W-MON'), 'Category']).size().unstack(fill_value=0)
             weekly_summary.index = weekly_summary.index.strftime('%Y-%m-%d')
             st.dataframe(weekly_summary, use_container_width=True, height=300)
-            fig, ax = plt.subplots(figsize=(4, 2.5))
-            weekly_summary.plot(kind='bar', ax=ax, color=sns.color_palette('Blues'))
-            ax.set_title('Weeklikse Insidente volgens Kategorie', pad=10, fontsize=12, weight='bold')
-            ax.set_xlabel('Week Begin (Maandag)', fontsize=10)
-            ax.set_ylabel('Aantal', fontsize=10)
+            fig, ax = plt.subplots(figsize=(8, 5), dpi=150)
+            weekly_summary.plot(kind='bar', ax=ax, color=sns.color_palette('Blues', n_colors=len(weekly_summary.columns)))
+            ax.set_title('Weeklikse Insidente volgens Kategorie', pad=15, fontsize=14, weight='bold')
+            ax.set_xlabel('Week Begin (Maandag)', fontsize=12, labelpad=10)
+            ax.set_ylabel('Aantal', fontsize=12, labelpad=10)
             ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-            ax.tick_params(axis='x', rotation=45, labelsize=9)
-            ax.tick_params(axis='y', labelsize=9)
-            plt.tight_layout(pad=1.0)
+            ax.tick_params(axis='x', rotation=45, labelsize=10)
+            ax.tick_params(axis='y', labelsize=10)
+            ax.grid(True, which='major', axis='y', linestyle='--', alpha=0.5)
+            ax.legend(title='Kategorie', fontsize=10, title_fontsize=10)
+            sns.despine(ax=ax, left=True)
+            ax.set_facecolor('#f9fafc')
+            fig.patch.set_facecolor('#ffffff')
+            plt.tight_layout(pad=1.5)
             st.pyplot(fig)
             plt.close()
         else:
@@ -864,15 +913,20 @@ with st.container():
             monthly_summary = incident_log.groupby([pd.Grouper(key='Date', freq='M'), 'Category']).size().unstack(fill_value=0)
             monthly_summary.index = monthly_summary.index.strftime('%Y-%m')
             st.dataframe(monthly_summary, use_container_width=True, height=300)
-            fig, ax = plt.subplots(figsize=(4, 2.5))
-            monthly_summary.plot(kind='bar', ax=ax, color=sns.color_palette('Blues'))
-            ax.set_title('Maandelikse Insidente volgens Kategorie', pad=10, fontsize=12, weight='bold')
-            ax.set_xlabel('Maand', fontsize=10)
-            ax.set_ylabel('Aantal', fontsize=10)
+            fig, ax = plt.subplots(figsize=(8, 5), dpi=150)
+            monthly_summary.plot(kind='bar', ax=ax, color=sns.color_palette('Blues', n_colors=len(monthly_summary.columns)))
+            ax.set_title('Maandelikse Insidente volgens Kategorie', pad=15, fontsize=14, weight='bold')
+            ax.set_xlabel('Maand', fontsize=12, labelpad=10)
+            ax.set_ylabel('Aantal', fontsize=12, labelpad=10)
             ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-            ax.tick_params(axis='x', rotation=45, labelsize=9)
-            ax.tick_params(axis='y', labelsize=9)
-            plt.tight_layout(pad=1.0)
+            ax.tick_params(axis='x', rotation=45, labelsize=10)
+            ax.tick_params(axis='y', labelsize=10)
+            ax.grid(True, which='major', axis='y', linestyle='--', alpha=0.5)
+            ax.legend(title='Kategorie', fontsize=10, title_fontsize=10)
+            sns.despine(ax=ax, left=True)
+            ax.set_facecolor('#f9fafc')
+            fig.patch.set_facecolor('#ffffff')
+            plt.tight_layout(pad=1.5)
             st.pyplot(fig)
             plt.close()
         else:
@@ -886,15 +940,20 @@ with st.container():
                 lambda x: f"{x.year}-Q{(x.month-1)//3 + 1}"
             )
             st.dataframe(quarterly_summary, use_container_width=True, height=300)
-            fig, ax = plt.subplots(figsize=(4, 2.5))
-            quarterly_summary.plot(kind='bar', ax=ax, color=sns.color_palette('Blues'))
-            ax.set_title('Kwartaallikse Insidente volgens Kategorie', pad=10, fontsize=12, weight='bold')
-            ax.set_xlabel('Kwartaal', fontsize=10)
-            ax.set_ylabel('Aantal', fontsize=10)
+            fig, ax = plt.subplots(figsize=(8, 5), dpi=150)
+            quarterly_summary.plot(kind='bar', ax=ax, color=sns.color_palette('Blues', n_colors=len(quarterly_summary.columns)))
+            ax.set_title('Kwartaallikse Insidente volgens Kategorie', pad=15, fontsize=14, weight='bold')
+            ax.set_xlabel('Kwartaal', fontsize=12, labelpad=10)
+            ax.set_ylabel('Aantal', fontsize=12, labelpad=10)
             ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-            ax.tick_params(axis='x', rotation=45, labelsize=9)
-            ax.tick_params(axis='y', labelsize=9)
-            plt.tight_layout(pad=1.0)
+            ax.tick_params(axis='x', rotation=45, labelsize=10)
+            ax.tick_params(axis='y', labelsize=10)
+            ax.grid(True, which='major', axis='y', linestyle='--', alpha=0.5)
+            ax.legend(title='Kategorie', fontsize=10, title_fontsize=10)
+            sns.despine(ax=ax, left=True)
+            ax.set_facecolor('#f9fafc')
+            fig.patch.set_facecolor('#ffffff')
+            plt.tight_layout(pad=1.5)
             st.pyplot(fig)
             plt.close()
         else:
