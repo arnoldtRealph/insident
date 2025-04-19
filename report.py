@@ -13,15 +13,11 @@ import uuid
 
 # Set seaborn style for professional charts
 sns.set_style("whitegrid")
-plt.rcParams['font.family'] = 'Roboto'
-plt.rcParams['font.size'] = 12
-plt.rcParams['axes.titlesize'] = 14
-plt.rcParams['axes.labelsize'] = 12
-plt.rcParams['xtick.labelsize'] = 10
-plt.rcParams['ytick.labelsize'] = 10
-plt.rcParams['legend.fontsize'] = 10
-plt.rcParams['axes.titleweight'] = 'bold'
-plt.rcParams['axes.labelweight'] = 'medium'
+plt.rcParams['font.size'] = 10
+plt.rcParams['axes.titlesize'] = 12
+plt.rcParams['axes.labelsize'] = 10
+plt.rcParams['xtick.labelsize'] = 9
+plt.rcParams['ytick.labelsize'] = 9
 
 # Set page config
 st.set_page_config(page_title="Insident Verslag", layout="wide")
@@ -34,6 +30,7 @@ st.markdown("""
             background-color: #f5f7fa;
             font-family: 'Roboto', sans-serif;
             color: #333333;
+            text-align: center;
         }
         [data-baseweb="baseweb"] {
             background-color: #f5f7fa !important;
@@ -49,11 +46,6 @@ st.markdown("""
             color: #e0e0e0 !important;
             box-shadow: 0 4px 12px rgba(0,0,0,0.4);
         }
-        [data-theme="dark"] .sidebar .sidebar-content {
-            background-color: #22252a !important;
-            color: #e0e0e0 !important;
-            border-right: 1px solid #3a3f46;
-        }
         [data-theme="dark"] .stMarkdown, [data-theme="dark"] .stText, 
         [data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3 {
             color: #e0e0e0 !important;
@@ -67,6 +59,9 @@ st.markdown("""
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
             margin-bottom: 20px;
             transition: transform 0.2s ease;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
         }
         .main .block-container:hover {
             transform: translateY(-2px);
@@ -89,36 +84,27 @@ st.markdown("""
             margin-bottom: 15px;
             border-bottom: 2px solid #e0e6ed;
             padding-bottom: 5px;
+            text-align: center;
         }
         h3 {
             color: #2e5a52;
             font-size: 1.3rem;
             font-weight: 500;
             margin-bottom: 10px;
+            text-align: center;
         }
 
         /* Input labels */
         .input-label {
             color: #2e5a52;
-            font-size: 0.95rem;
+            font-size: 2rem;
             font-weight: 500;
             margin-bottom: 8px;
             display: block;
+            text-align: center;
         }
         [data-theme="dark"] .input-label {
             color: #e0e0e0 !important;
-        }
-
-        /* Sidebar */
-        .sidebar .sidebar-content {
-            background-color: #e8ecef;
-            padding: 20px;
-            border-right: 1px solid #d3dbe3;
-            width: 280px;
-            border-radius: 0 12px 12px 0;
-        }
-        [data-theme="dark"] .sidebar .sidebar-content {
-            border-right: 1px solid #3a3f46;
         }
 
         /* Buttons */
@@ -127,13 +113,16 @@ st.markdown("""
             color: #ffffff !important;
             border: none;
             border-radius: 8px;
-            padding: 10px 16px;
+            padding: 8px 12px;
             font-size: 0.9rem;
             font-weight: 500;
             transition: all 0.3s ease;
+            max-width: 200px;
             width: 100%;
-            margin: 8px 0;
+            margin: 8px auto;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            display: block;
         }
         .stButton>button:hover, .stDownloadButton>button:hover {
             background-color: #155e4f;
@@ -167,6 +156,8 @@ st.markdown("""
             border-radius: 8px;
             overflow-x: auto;
             background-color: #ffffff;
+            max-width: 1000px;
+            margin: 0 auto;
         }
         .stDataFrame table {
             width: 100%;
@@ -210,24 +201,53 @@ st.markdown("""
             background-color: #3a3f46;
         }
 
-        /* Sidebar inputs */
-        .stSelectbox, .stTextArea {
-            background-color: #ffffff;
+        /* Selectbox (dropdowns) */
+        .stSelectbox {
+            background-color: #3af0a5;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s ease;
+            max-width: 400px;
+            width: 100%;
+            margin: 0 auto;
+            display: block;
+        }
+        [data-theme="dark"] .stSelectbox {
+            background-color: #3af0a5;
+            border: 1px solid #4a5059;
+            color: #333333;
+        }
+        .stSelectbox:hover {
+            border-color: #1a3c34;
+        }
+        [data-theme="dark"] .stSelectbox:hover {
+            border-color: #155e4f;
+        }
+
+        /* Text area */
+        .stTextArea {
+            background-color: #3af0a5;
             border: 1px solid #ced4da;
             border-radius: 8px;
             padding: 10px;
             font-size: 0.95rem;
             transition: border-color 0.3s ease;
+            max-width: 400px;
+            width: 100%;
+            margin: 0 auto;
+            display: block;
         }
-        [data-theme="dark"] .stSelectbox, [data-theme="dark"] .stTextArea {
-            background-color: #2e3238;
+        [data-theme="dark"] .stTextArea {
+            background-color: #3af0a5;
             border: 1px solid #4a5059;
-            color: #e0e0e0;
+            color: #333333;
         }
-        .stSelectbox:hover, .stTextArea:hover {
+        .stTextArea:hover {
             border-color: #1a3c34;
         }
-        [data-theme="dark"] .stSelectbox:hover, [data-theme="dark"] .stTextArea:hover {
+        [data-theme="dark"] .stTextArea:hover {
             border-color: #155e4f;
         }
 
@@ -235,6 +255,7 @@ st.markdown("""
         .stMarkdown, .stText {
             color: #333333;
             font-size: 0.95rem;
+            text-align: center;
         }
         [data-theme="dark"] .stMarkdown, [data-theme="dark"] .stText {
             color: #e0e0e0;
@@ -244,9 +265,15 @@ st.markdown("""
             font-size: 0.95rem;
             padding: 12px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 0 auto;
         }
 
         /* Tabs */
+        .stTabs {
+            display: flex;
+            justify-content: center;
+        }
         .stTabs [data-baseweb="tab"] {
             background-color: #e8ecef;
             border-radius: 8px 8px 0 0;
@@ -282,9 +309,35 @@ st.markdown("""
             padding: 10px;
             background-color: #ffffff;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            max-width: 600px;
+            margin: 0 auto;
         }
         [data-theme="dark"] .stPyplot {
             background-color: #2e3238;
+        }
+
+        /* Separator */
+        .custom-divider {
+            border-top: 4px solid #e0e6ed;
+            margin: 30px auto;
+            max-width: 800px;
+        }
+        [data-theme="dark"] .custom-divider {
+            border-top: 4px solid #4a5059;
+        }
+
+        /* Pagination form */
+        .pagination-form {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .pagination-form .stForm {
+            display: flex;
+            justify-content: center;
+            width: 100%;
         }
 
         /* Mobile optimization */
@@ -297,7 +350,7 @@ st.markdown("""
                 font-size: 2rem;
             }
             h2 {
-                font-size: 1.5 manufacture
+                font-size: 1.5rem;
             }
             h3 {
                 font-size: 1.2rem;
@@ -305,30 +358,50 @@ st.markdown("""
             .input-label {
                 font-size: 0.9rem;
             }
-            .sidebar .sidebar-content {
-                width: 100%;
-                padding: 15px;
-                border-radius: 0;
-            }
             .stButton>button, .stDownloadButton>button {
-                padding: 8px 12px;
+                padding: 6px 10px;
                 font-size: 0.85rem;
+                max-width: 150px;
+                margin: 8px auto;
+                display: block;
             }
-            .stSelectbox, .stTextArea {
+            .stSelectbox {
                 font-size: 0.9rem;
-                padding: 8px;
+                padding: 6px;
+                max-width: 300px;
+                margin: 0 auto;
+                display: block;
             }
-            .stDataFrame th, .stDataFrame td {
-                font-size: 0.85rem;
-                padding: 8px;
+            .stTextArea {
+                font-size: 0.9rem;
+                padding: 6px;
+                max-width: 300px;
+                margin: 0 auto;
+                display: block;
+            }
+            .stDataFrame {
+                max-width: 100%;
             }
             .stPyplot {
-                width: 100% !important;
-                height: auto !important;
+                max-width: 100%;
+            }
+            .stAlert {
+                max-width: 90%;
             }
             .stTabs [data-baseweb="tab"] {
                 padding: 8px 12px;
                 font-size: 0.85rem;
+            }
+            .custom-divider {
+                border-top: 3px solid #e0e6ed;
+                margin: 20px auto;
+                max-width: 90%;
+            }
+            [data-theme="dark"] .custom-divider {
+                border-top: 3px solid #4a5059;
+            }
+            .pagination-form {
+                max-width: 90%;
             }
         }
     </style>
@@ -404,44 +477,6 @@ def clear_incident(index):
         return incident_log
     return incident_log
 
-# Helper function to create professional bar charts
-def create_bar_chart(data, x, y, title, xlabel, ylabel, rotation=45, figsize=(6, 4)):
-    fig, ax = plt.subplots(figsize=figsize, dpi=150)
-    palette = sns.color_palette("Blues", n_colors=len(data))
-    sns.barplot(x=x, y=y, data=data, ax=ax, palette=palette)
-    ax.set_title(title, pad=15, fontsize=14, weight='bold')
-    ax.set_xlabel(xlabel, fontsize=12, labelpad=10)
-    ax.set_ylabel(ylabel, fontsize=12, labelpad=10)
-    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-    ax.tick_params(axis='x', rotation=rotation, labelsize=10)
-    ax.tick_params(axis='y', labelsize=10)
-    ax.grid(True, which='major', axis='y', linestyle='--', alpha=0.5)
-    sns.despine(ax=ax, left=True)
-    ax.set_facecolor('#f9fafc')
-    fig.patch.set_facecolor('#ffffff')
-    plt.tight_layout(pad=1.5)
-    img_stream = io.BytesIO()
-    plt.savefig(img_stream, format='png', bbox_inches='tight', dpi=150)
-    plt.close()
-    img_stream.seek(0)
-    return img_stream
-
-# Helper function to create professional pie charts
-def create_pie_chart(data, title, figsize=(5, 5)):
-    fig, ax = plt.subplots(figsize=figsize, dpi=150)
-    data.plot(kind='pie', ax=ax, autopct='%1.1f%%', colors=sns.color_palette('Blues', len(data)),
-              textprops={'fontsize': 10, 'weight': 'medium'}, startangle=90)
-    ax.set_title(title, pad=15, fontsize=14, weight='bold')
-    ax.set_ylabel('')
-    ax.set_aspect('equal')
-    fig.patch.set_facecolor('#ffffff')
-    plt.tight_layout(pad=1.5)
-    img_stream = io.BytesIO()
-    plt.savefig(img_stream, format='png', bbox_inches='tight', dpi=150)
-    plt.close()
-    img_stream.seek(0)
-    return img_stream
-
 # Generate Word document
 def generate_word_report(df):
     doc = Document()
@@ -471,68 +506,78 @@ def generate_word_report(df):
     doc.add_heading('Insident Analise', level=1)
 
     # Bar chart: Incidents by Category
-    category_counts = df['Category'].value_counts().sort_index().reset_index()
-    category_counts.columns = ['Category', 'Count']
-    img_stream = create_bar_chart(
-        data=category_counts,
-        x='Category',
-        y='Count',
-        title='Insidente volgens Kategorie',
-        xlabel='Kategorie',
-        ylabel='Aantal',
-        rotation=0
-    )
-    doc.add_picture(img_stream, width=Inches(4.5))
+    fig, ax = plt.subplots(figsize=(4, 2.5))
+    category_counts = df['Category'].value_counts().sort_index()
+    sns.barplot(x=category_counts.index, y=category_counts.values, ax=ax, palette='Blues')
+    ax.set_title('Insidente volgens Kategorie', pad=10, fontsize=12, weight='bold')
+    ax.set_xlabel('Kategorie', fontsize=10)
+    ax.set_ylabel('Aantal', fontsize=10)
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+    ax.tick_params(axis='x', rotation=0, labelsize=9)
+    ax.tick_params(axis='y', labelsize=9)
+    plt.tight_layout(pad=1.0)
+    img_stream = io.BytesIO()
+    plt.savefig(img_stream, format='png', dpi=100, bbox_inches='tight')
+    plt.close()
+    doc.add_picture(img_stream, width=Inches(3.5))
 
     # Bar chart: Incidents by Incident Type
-    incident_counts = df['Incident'].value_counts().reset_index()
-    incident_counts.columns = ['Incident', 'Count']
-    img_stream = create_bar_chart(
-        data=incident_counts,
-        x='Incident',
-        y='Count',
-        title='Insidente volgens Tipe',
-        xlabel='Insident',
-        ylabel='Aantal',
-        rotation=45
-    )
-    doc.add_picture(img_stream, width=Inches(4.5))
+    fig, ax = plt.subplots(figsize=(4, 2.5))
+    incident_counts = df['Incident'].value_counts()
+    sns.barplot(x=incident_counts.index, y=incident_counts.values, ax=ax, palette='Blues')
+    ax.set_title('Insidente volgens Tipe', pad=10, fontsize=12, weight='bold')
+    ax.set_xlabel('Insident', fontsize=10)
+    ax.set_ylabel('Aantal', fontsize=10)
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+    ax.tick_params(axis='x', rotation=45, labelsize=9)
+    ax.tick_params(axis='y', labelsize=9)
+    plt.tight_layout(pad=1.0)
+    img_stream = io.BytesIO()
+    plt.savefig(img_stream, format='png', dpi=100, bbox_inches='tight')
+    plt.close()
+    doc.add_picture(img_stream, width=Inches(3.5))
 
     # Bar chart: Incidents by Teacher
-    teacher_counts = df['Teacher'].value_counts().reset_index()
-    teacher_counts.columns = ['Teacher', 'Count']
-    img_stream = create_bar_chart(
-        data=teacher_counts,
-        x='Teacher',
-        y='Count',
-        title='Insidente volgens Rapporterende Onderwyser',
-        xlabel='Onderwyser',
-        ylabel='Aantal',
-        rotation=45
-    )
-    doc.add_picture(img_stream, width=Inches(4.5))
+    fig, ax = plt.subplots(figsize=(4, 2.5))
+    teacher_counts = df['Teacher'].value_counts()
+    sns.barplot(x=teacher_counts.index, y=teacher_counts.values, ax=ax, palette='Blues')
+    ax.set_title('Insidente volgens Rapporterende Onderwyser', pad=10, fontsize=12, weight='bold')
+    ax.set_xlabel('Onderwyser', fontsize=10)
+    ax.set_ylabel('Aantal', fontsize=10)
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+    ax.tick_params(axis='x', rotation=45, labelsize=9)
+    ax.tick_params(axis='y', labelsize=9)
+    plt.tight_layout(pad=1.0)
+    img_stream = io.BytesIO()
+    plt.savefig(img_stream, format='png', dpi=100, bbox_inches='tight')
+    plt.close()
+    doc.add_picture(img_stream, width=Inches(3.5))
 
     # Bar chart: Incidents by Class
-    class_counts = df['Class'].value_counts().reset_index()
-    class_counts.columns = ['Class', 'Count']
-    img_stream = create_bar_chart(
-        data=class_counts,
-        x='Class',
-        y='Count',
-        title='Insidente volgens Klas',
-        xlabel='Klas',
-        ylabel='Aantal',
-        rotation=45
-    )
-    doc.add_picture(img_stream, width=Inches(4.5))
+    fig, ax = plt.subplots(figsize=(4, 2.5))
+    class_counts = df['Class'].value_counts()
+    sns.barplot(x=class_counts.index, y=class_counts.values, ax=ax, palette='Blues')
+    ax.set_title('Insidente volgens Klas', pad=10, fontsize=12, weight='bold')
+    ax.set_xlabel('Klas', fontsize=10)
+    ax.set_ylabel('Aantal', fontsize=10)
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+    ax.tick_params(axis='x', rotation=45, labelsize=9)
+    ax.tick_params(axis='y', labelsize=9)
+    plt.tight_layout(pad=1.0)
+    img_stream = io.BytesIO()
+    plt.savefig(img_stream, format='png', dpi=100, bbox_inches='tight')
+    plt.close()
+    doc.add_picture(img_stream, width=Inches(3.5))
 
     # Pie chart: Incident Distribution
-    category_counts = df['Category'].value_counts()
-    img_stream = create_pie_chart(
-        data=category_counts,
-        title='Insident Verspreiding volgens Kategorie'
-    )
-    doc.add_picture(img_stream, width=Inches(4.5))
+    fig, ax = plt.subplots(figsize=(4, 2.5))
+    category_counts.plot(kind='pie', ax=ax, autopct='%1.1f%%', colors=sns.color_palette('Blues'), textprops={'fontsize': 9})
+    ax.set_title('Insident Verspreiding volgens Kategorie', pad=10, fontsize=12, weight='bold')
+    plt.tight_layout(pad=1.0)
+    img_stream = io.BytesIO()
+    plt.savefig(img_stream, format='png', dpi=100, bbox_inches='tight')
+    plt.close()
+    doc.add_picture(img_stream, width=Inches(3.5))
 
     doc_stream = io.BytesIO()
     doc.save(doc_stream)
@@ -569,18 +614,20 @@ def generate_learner_report(df, learner_full_name, period, start_date, end_date)
 
     if not df.empty:
         doc.add_heading('Insident Analise', level=1)
-        category_counts = df['Category'].value_counts().sort_index().reset_index()
-        category_counts.columns = ['Category', 'Count']
-        img_stream = create_bar_chart(
-            data=category_counts,
-            x='Category',
-            y='Count',
-            title='Insidente volgens Kategorie',
-            xlabel='Kategorie',
-            ylabel='Aantal',
-            rotation=0
-        )
-        doc.add_picture(img_stream, width=Inches(4.5))
+        fig, ax = plt.subplots(figsize=(4, 2.5))
+        category_counts = df['Category'].value_counts().sort_index()
+        sns.barplot(x=category_counts.index, y=category_counts.values, ax=ax, palette='Blues')
+        ax.set_title('Insidente volgens Kategorie', pad=10, fontsize=12, weight='bold')
+        ax.set_xlabel('Kategorie', fontsize=10)
+        ax.set_ylabel('Aantal', fontsize=10)
+        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+        ax.tick_params(axis='x', rotation=0, labelsize=9)
+        ax.tick_params(axis='y', labelsize=9)
+        plt.tight_layout(pad=1.0)
+        img_stream = io.BytesIO()
+        plt.savefig(img_stream, format='png', dpi=100, bbox_inches='tight')
+        plt.close()
+        doc.add_picture(img_stream, width=Inches(3.5))
 
     doc_stream = io.BytesIO()
     doc.save(doc_stream)
@@ -591,8 +638,12 @@ def generate_learner_report(df, learner_full_name, period, start_date, end_date)
 learner_df = load_learner_data()
 incident_log = load_incident_log()
 
-# Sidebar for incident input
-with st.sidebar:
+# Main content
+with st.container():
+    st.title("HOËRSKOOL SAUL DAMON")
+    st.subheader("INSIDENT VERSLAG")
+
+    # Former sidebar content: Report New Incident
     st.header("Rapporteer Nuwe Insident")
     with st.container():
         st.markdown('<div class="input-label">Leerder Naam</div>', unsafe_allow_html=True)
@@ -620,6 +671,7 @@ with st.sidebar:
             else:
                 st.error("Vul asseblief alle velde in en voer kommentaar in.")
 
+    # Former sidebar content: Generate Learner Report
     st.header("Genereer Leerder Verslag")
     with st.container():
         st.markdown('<div class="input-label">Kies Leerder vir Verslag</div>', unsafe_allow_html=True)
@@ -640,7 +692,7 @@ with st.sidebar:
         elif report_period == 'Maandelik':
             start_date = today.replace(day=1)
             end_date = (start_date + timedelta(days=32)).replace(day=1) - timedelta(seconds=1)
-        else:
+        else:  # Kwartaalliks
             quarter_start_month = ((today.month - 1) // 3) * 3 + 1
             start_date = today.replace(month=quarter_start_month, day=1)
             end_date = (start_date + timedelta(days=92)).replace(day=1) - timedelta(seconds=1)
@@ -671,11 +723,10 @@ with st.sidebar:
             else:
                 st.error("Kies asseblief 'n leerder.")
 
-# Main content
-with st.container():
-    st.title("HOËRSKOOL SAUL DAMON")
-    st.subheader("INSIDENT VERSLAG")
+    # Visual separator
+    st.markdown('<div class="custom-divider"></div>', unsafe_allow_html=True)
 
+    # Original main content
     st.subheader("Insident Log")
     if not incident_log.empty:
         rows_per_page = 10
@@ -685,7 +736,8 @@ with st.container():
         if 'incident_log_page' not in st.session_state:
             st.session_state.incident_log_page = 1
 
-        with st.form(key="pagination_form"):
+        # Use a form to handle pagination buttons
+        with st.form(key="pagination_form", clear_on_submit=False):
             col1, col2, col3 = st.columns([1, 2, 1])
             with col1:
                 submit_prev = st.form_submit_button("Vorige", disabled=(st.session_state.incident_log_page <= 1))
@@ -705,12 +757,15 @@ with st.container():
                 st.session_state.incident_log_page = selected_page
                 st.rerun()
 
+        # Calculate indices
         start_idx = (st.session_state.incident_log_page - 1) * rows_per_page
         end_idx = min(start_idx + rows_per_page, total_rows)
 
+        # Create display DataFrame with one-based index
         display_df = incident_log.iloc[start_idx:end_idx].copy()
         display_df.index = range(start_idx + 1, min(end_idx + 1, total_rows + 1))
 
+        # Display table
         st.dataframe(
             display_df,
             height=300,
@@ -727,6 +782,7 @@ with st.container():
         )
         st.write(f"Wys {start_idx + 1} tot {end_idx} van {total_rows} insidente")
 
+        # Download full report
         st.download_button(
             label="Laai Verslag af as Word",
             data=generate_word_report(incident_log),
@@ -734,6 +790,7 @@ with st.container():
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
 
+        # Delete incident
         st.write("Verwyder 'n Insident")
         one_based_indices = list(range(1, total_rows + 1))
         st.markdown('<div class="input-label">Kies Insident om te Verwyder (deur Indeks)</div>', unsafe_allow_html=True)
@@ -759,78 +816,58 @@ with st.container():
         st.write(f"Totale Insidente Vandag: {len(today_incidents)}")
 
         st.write("Insidente volgens Kategorie")
-        category_counts = today_incidents['Category'].value_counts().sort_index().reset_index()
-        category_counts.columns = ['Category', 'Count']
-        fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
-        sns.barplot(x='Category', y='Count', data=category_counts, ax=ax, palette='Blues')
-        ax.set_title('Insidente volgens Kategorie (Vandag)', pad=15, fontsize=14, weight='bold')
-        ax.set_xlabel('Kategorie', fontsize=12, labelpad=10)
-        ax.set_ylabel('Aantal', fontsize=12, labelpad=10)
+        fig, ax = plt.subplots(figsize=(4, 2.5))
+        category_counts = today_incidents['Category'].value_counts().sort_index()
+        sns.barplot(x=category_counts.index, y=category_counts.values, ax=ax, palette='Blues')
+        ax.set_title('Insidente volgens Kategorie (Vandag)', pad=10, fontsize=12, weight='bold')
+        ax.set_xlabel('Kategorie', fontsize=10)
+        ax.set_ylabel('Aantal', fontsize=10)
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-        ax.tick_params(axis='x', rotation=0, labelsize=10)
-        ax.tick_params(axis='y', labelsize=10)
-        ax.grid(True, which='major', axis='y', linestyle='--', alpha=0.5)
-        sns.despine(ax=ax, left=True)
-        ax.set_facecolor('#f9fafc')
-        fig.patch.set_facecolor('#ffffff')
-        plt.tight_layout(pad=1.5)
+        ax.tick_params(axis='x', rotation=0, labelsize=9)
+        ax.tick_params(axis='y', labelsize=9)
+        plt.tight_layout(pad=1.0)
         st.pyplot(fig)
         plt.close()
 
         st.write("Insidente volgens Tipe")
-        incident_counts = today_incidents['Incident'].value_counts().reset_index()
-        incident_counts.columns = ['Incident', 'Count']
-        fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
-        sns.barplot(x='Incident', y='Count', data=incident_counts, ax=ax, palette='Blues')
-        ax.set_title('Insidente volgens Tipe (Vandag)', pad=15, fontsize=14, weight='bold')
-        ax.set_xlabel('Insident', fontsize=12, labelpad=10)
-        ax.set_ylabel('Aantal', fontsize=12, labelpad=10)
+        fig, ax = plt.subplots(figsize=(4, 2.5))
+        incident_counts = today_incidents['Incident'].value_counts()
+        sns.barplot(x=incident_counts.index, y=incident_counts.values, ax=ax, palette='Blues')
+        ax.set_title('Insidente volgens Tipe (Vandag)', pad=10, fontsize=12, weight='bold')
+        ax.set_xlabel('Insident', fontsize=10)
+        ax.set_ylabel('Aantal', fontsize=10)
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-        ax.tick_params(axis='x', rotation=60, labelsize=10)
-        ax.tick_params(axis='y', labelsize=10)
-        ax.grid(True, which='major', axis='y', linestyle='--', alpha=0.5)
-        sns.despine(ax=ax, left=True)
-        ax.set_facecolor('#f9fafc')
-        fig.patch.set_facecolor('#ffffff')
-        plt.tight_layout(pad=1.5)
+        ax.tick_params(axis='x', rotation=60, labelsize=9)
+        ax.tick_params(axis='y', labelsize=9)
+        plt.tight_layout(pad=1.0)
         st.pyplot(fig)
         plt.close()
 
         st.write("Insidente volgens Rapporterende Onderwyser")
-        teacher_counts = today_incidents['Teacher'].value_counts().reset_index()
-        teacher_counts.columns = ['Teacher', 'Count']
-        fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
-        sns.barplot(x='Teacher', y='Count', data=teacher_counts, ax=ax, palette='Blues')
-        ax.set_title('Insidente volgens Rapporterende Onderwyser (Vandag)', pad=15, fontsize=14, weight='bold')
-        ax.set_xlabel('Onderwyser', fontsize=12, labelpad=10)
-        ax.set_ylabel('Aantal', fontsize=12, labelpad=10)
+        fig, ax = plt.subplots(figsize=(4, 2.5))
+        teacher_counts = today_incidents['Teacher'].value_counts()
+        sns.barplot(x=teacher_counts.index, y=teacher_counts.values, ax=ax, palette='Blues')
+        ax.set_title('Insidente volgens Rapporterende Onderwyser (Vandag)', pad=10, fontsize=12, weight='bold')
+        ax.set_xlabel('Onderwyser', fontsize=10)
+        ax.set_ylabel('Aantal', fontsize=10)
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-        ax.tick_params(axis='x', rotation=60, labelsize=10)
-        ax.tick_params(axis='y', labelsize=10)
-        ax.grid(True, which='major', axis='y', linestyle='--', alpha=0.5)
-        sns.despine(ax=ax, left=True)
-        ax.set_facecolor('#f9fafc')
-        fig.patch.set_facecolor('#ffffff')
-        plt.tight_layout(pad=1.5)
+        ax.tick_params(axis='x', rotation=60, labelsize=9)
+        ax.tick_params(axis='y', labelsize=9)
+        plt.tight_layout(pad=1.0)
         st.pyplot(fig)
         plt.close()
 
         st.write("Insidente volgens Klas")
-        class_counts = today_incidents['Class'].value_counts().reset_index()
-        class_counts.columns = ['Class', 'Count']
-        fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
-        sns.barplot(x='Class', y='Count', data=class_counts, ax=ax, palette='Blues')
-        ax.set_title('Insidente volgens Klas (Vandag)', pad=15, fontsize=14, weight='bold')
-        ax.set_xlabel('Klas', fontsize=12, labelpad=10)
-        ax.set_ylabel('Aantal', fontsize=12, labelpad=10)
+        fig, ax = plt.subplots(figsize=(4, 2.5))
+        class_counts = today_incidents['Class'].value_counts()
+        sns.barplot(x=class_counts.index, y=class_counts.values, ax=ax, palette='Blues')
+        ax.set_title('Insidente volgens Klas (Vandag)', pad=10, fontsize=12, weight='bold')
+        ax.set_xlabel('Klas', fontsize=10)
+        ax.set_ylabel('Aantal', fontsize=10)
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-        ax.tick_params(axis='x', rotation=60, labelsize=10)
-        ax.tick_params(axis='y', labelsize=10)
-        ax.grid(True, which='major', axis='y', linestyle='--', alpha=0.5)
-        sns.despine(ax=ax, left=True)
-        ax.set_facecolor('#f9fafc')
-        fig.patch.set_facecolor('#ffffff')
-        plt.tight_layout(pad=1.5)
+        ax.tick_params(axis='x', rotation=60, labelsize=9)
+        ax.tick_params(axis='y', labelsize=9)
+        plt.tight_layout(pad=1.0)
         st.pyplot(fig)
         plt.close()
     else:
@@ -888,20 +925,15 @@ with st.container():
             weekly_summary = incident_log.groupby([pd.Grouper(key='Date', freq='W-MON'), 'Category']).size().unstack(fill_value=0)
             weekly_summary.index = weekly_summary.index.strftime('%Y-%m-%d')
             st.dataframe(weekly_summary, use_container_width=True, height=300)
-            fig, ax = plt.subplots(figsize=(8, 5), dpi=150)
-            weekly_summary.plot(kind='bar', ax=ax, color=sns.color_palette('Blues', n_colors=len(weekly_summary.columns)))
-            ax.set_title('Weeklikse Insidente volgens Kategorie', pad=15, fontsize=14, weight='bold')
-            ax.set_xlabel('Week Begin (Maandag)', fontsize=12, labelpad=10)
-            ax.set_ylabel('Aantal', fontsize=12, labelpad=10)
+            fig, ax = plt.subplots(figsize=(4, 2.5))
+            weekly_summary.plot(kind='bar', ax=ax, color=sns.color_palette('Blues'))
+            ax.set_title('Weeklikse Insidente volgens Kategorie', pad=10, fontsize=12, weight='bold')
+            ax.set_xlabel('Week Begin (Maandag)', fontsize=10)
+            ax.set_ylabel('Aantal', fontsize=10)
             ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-            ax.tick_params(axis='x', rotation=45, labelsize=10)
-            ax.tick_params(axis='y', labelsize=10)
-            ax.grid(True, which='major', axis='y', linestyle='--', alpha=0.5)
-            ax.legend(title='Kategorie', fontsize=10, title_fontsize=10)
-            sns.despine(ax=ax, left=True)
-            ax.set_facecolor('#f9fafc')
-            fig.patch.set_facecolor('#ffffff')
-            plt.tight_layout(pad=1.5)
+            ax.tick_params(axis='x', rotation=45, labelsize=9)
+            ax.tick_params(axis='y', labelsize=9)
+            plt.tight_layout(pad=1.0)
             st.pyplot(fig)
             plt.close()
         else:
@@ -913,20 +945,15 @@ with st.container():
             monthly_summary = incident_log.groupby([pd.Grouper(key='Date', freq='M'), 'Category']).size().unstack(fill_value=0)
             monthly_summary.index = monthly_summary.index.strftime('%Y-%m')
             st.dataframe(monthly_summary, use_container_width=True, height=300)
-            fig, ax = plt.subplots(figsize=(8, 5), dpi=150)
-            monthly_summary.plot(kind='bar', ax=ax, color=sns.color_palette('Blues', n_colors=len(monthly_summary.columns)))
-            ax.set_title('Maandelikse Insidente volgens Kategorie', pad=15, fontsize=14, weight='bold')
-            ax.set_xlabel('Maand', fontsize=12, labelpad=10)
-            ax.set_ylabel('Aantal', fontsize=12, labelpad=10)
+            fig, ax = plt.subplots(figsize=(4, 2.5))
+            monthly_summary.plot(kind='bar', ax=ax, color=sns.color_palette('Blues'))
+            ax.set_title('Maandelikse Insidente volgens Kategorie', pad=10, fontsize=12, weight='bold')
+            ax.set_xlabel('Maand', fontsize=10)
+            ax.set_ylabel('Aantal', fontsize=10)
             ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-            ax.tick_params(axis='x', rotation=45, labelsize=10)
-            ax.tick_params(axis='y', labelsize=10)
-            ax.grid(True, which='major', axis='y', linestyle='--', alpha=0.5)
-            ax.legend(title='Kategorie', fontsize=10, title_fontsize=10)
-            sns.despine(ax=ax, left=True)
-            ax.set_facecolor('#f9fafc')
-            fig.patch.set_facecolor('#ffffff')
-            plt.tight_layout(pad=1.5)
+            ax.tick_params(axis='x', rotation=45, labelsize=9)
+            ax.tick_params(axis='y', labelsize=9)
+            plt.tight_layout(pad=1.0)
             st.pyplot(fig)
             plt.close()
         else:
@@ -940,20 +967,15 @@ with st.container():
                 lambda x: f"{x.year}-Q{(x.month-1)//3 + 1}"
             )
             st.dataframe(quarterly_summary, use_container_width=True, height=300)
-            fig, ax = plt.subplots(figsize=(8, 5), dpi=150)
-            quarterly_summary.plot(kind='bar', ax=ax, color=sns.color_palette('Blues', n_colors=len(quarterly_summary.columns)))
-            ax.set_title('Kwartaallikse Insidente volgens Kategorie', pad=15, fontsize=14, weight='bold')
-            ax.set_xlabel('Kwartaal', fontsize=12, labelpad=10)
-            ax.set_ylabel('Aantal', fontsize=12, labelpad=10)
+            fig, ax = plt.subplots(figsize=(4, 2.5))
+            quarterly_summary.plot(kind='bar', ax=ax, color=sns.color_palette('Blues'))
+            ax.set_title('Kwartaallikse Insidente volgens Kategorie', pad=10, fontsize=12, weight='bold')
+            ax.set_xlabel('Kwartaal', fontsize=10)
+            ax.set_ylabel('Aantal', fontsize=10)
             ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-            ax.tick_params(axis='x', rotation=45, labelsize=10)
-            ax.tick_params(axis='y', labelsize=10)
-            ax.grid(True, which='major', axis='y', linestyle='--', alpha=0.5)
-            ax.legend(title='Kategorie', fontsize=10, title_fontsize=10)
-            sns.despine(ax=ax, left=True)
-            ax.set_facecolor('#f9fafc')
-            fig.patch.set_facecolor('#ffffff')
-            plt.tight_layout(pad=1.5)
+            ax.tick_params(axis='x', rotation=45, labelsize=9)
+            ax.tick_params(axis='y', labelsize=9)
+            plt.tight_layout(pad=1.0)
             st.pyplot(fig)
             plt.close()
         else:
