@@ -19,9 +19,9 @@ plt.rcParams['xtick.labelsize'] = 8
 plt.rcParams['ytick.labelsize'] = 8
 
 # Set page config
-st.set_page_config(page_title="Insident Verslag", layout="wide")
+st.set_page_config(page_title="Insident Spoorder", layout="wide")
 
-# Custom CSS for professional styling, dark mode, and mobile optimization
+# Custom CSS for professional styling, dark mode, and responsive buttons
 st.markdown("""
     <style>
         /* General layout */
@@ -100,56 +100,41 @@ st.markdown("""
             width: 250px;
         }
 
-        /* Buttons */
-        .stButton>button {
+        /* Buttons (PC view) */
+        .stButton>button, .stDownloadButton>button {
             background-color: #28a745;
             color: #ffffff !important;
             border: none;
             border-radius: 4px;
-            padding: 12px 18px;
-            font-size: 0.9rem;
+            padding: 8px 12px;
+            font-size: 0.85rem;
             font-weight: 500;
             transition: background-color 0.2s;
             width: 100%;
             margin: 5px 0;
         }
-        .stButton>button:hover {
+        .stButton>button:hover, .stDownloadButton>button:hover {
             background-color: #218838;
             color: #ffffff !important;
         }
-        .stButton>button:active {
+        .stButton>button:active, .stDownloadButton>button:active {
             background-color: #1e7e34;
             color: #ffffff !important;
         }
-        .stButton>button:disabled {
+        .stButton>button:disabled, .stDownloadButton>button:disabled {
             background-color: #6c757d;
             color: #d3d3d3 !important;
         }
 
-        /* Download button */
+        /* Download button specific */
         .stDownloadButton>button {
             background-color: #007bff;
-            color: #ffffff !important;
-            border: none;
-            border-radius: 4px;
-            padding: 12px 18px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: background-color 0.2s;
-            width: 100%;
-            margin: 5px 0;
         }
         .stDownloadButton>button:hover {
             background-color: #0056b3;
-            color: #ffffff !important;
         }
         .stDownloadButton>button:active {
             background-color: #004085;
-            color: #ffffff !important;
-        }
-        .stDownloadButton>button:disabled {
-            background-color: #6c757d;
-            color: #d3d3d3 !important;
         }
 
         /* Dataframe styling */
@@ -211,6 +196,7 @@ st.markdown("""
             color: #f8f9fa;
         }
         .stSelectbox:hover, .stTextArea:hover {
+            background-color: #f8f9fa;
             border-color: #28a745;
         }
         [data-theme="dark"] .stSelectbox:hover, [data-theme="dark"] .stTextArea:hover {
@@ -307,7 +293,7 @@ def load_incident_log():
         df['Category'] = pd.to_numeric(df['Category'], errors='coerce').fillna(1).astype(int).astype(str)
         df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
         sa_tz = pytz.timezone('Africa/Johannesburg')
-        df['Date'] = df['Date'].dt.tz_localize('UTC').dt.tz_convert(sa_tz).dt.tz_localize(None)
+        df['Date'] = df['Date'].dt.tz_localize('UTC', ambiguous='infer', nonexistent='shift_forward').dt.tz_convert(sa_tz).dt.tz_localize(None)
         return df
     except FileNotFoundError:
         return pd.DataFrame(columns=['Learner_Full_Name', 'Class', 'Teacher', 'Incident', 'Category', 'Comment', 'Date'])
@@ -597,28 +583,36 @@ with st.container():
         if 'incident_log_page' not in st.session_state:
             st.session_state.incident_log_page = 1
 
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col1:
-            if st.button("Vorige", disabled=(st.session_state.incident_log_page == 1)):
-                st.session_state.incident_log_page -= 1
-        with col2:
-            page_options = list(range(1, total_pages + 1))
-            st.session_state.incident_log_page = st.selectbox(
-                "Bladsy",
-                options=page_options,
-                index=st.session_state.incident_log_page - 1,
-                key="incident_log_page_select"
-            )
-        with col3:
-            if st.button("Volgende", disabled=(st.session_state.incident_log_page == total_pages)):
-                st.session_state.incident_log_page += 1
+        # Use a form to handle pagination buttons
+        with st.form(key="pagination_form"):
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col1:
+                submit_prev = st.form_submit_button("Vorige", disabled=(st.session_state.incident_log_page <= 1))
+            with col2:
+                page_options = list(range(1, total_pages + 1))
+                selected_page = st.selectbox("Bladsy", options=page_options, index=st.session_state.incident_log_page - 1, key="incident_log_page_select")
+            with col3:
+                submit_next = st.form_submit_button("Volgende", disabled=(st.session_state.incident_log_page >= total_pages))
 
+            if submit_prev:
+                st.session_state.incident_log_page = max(1, st.session_state.incident_log_page - 1)
+                st.rerun()
+            if submit_next:
+                st.session_state.incident_log_page = min(total_pages, st.session_state.incident_log_page + 1)
+                st.rerun()
+            if selected_page != st.session_state.incident_log_page:
+                st.session_state.incident_log_page = selected_page
+                st.rerun()
+
+        # Calculate indices
         start_idx = (st.session_state.incident_log_page - 1) * rows_per_page
         end_idx = min(start_idx + rows_per_page, total_rows)
 
+        # Create display DataFrame with one-based index
         display_df = incident_log.iloc[start_idx:end_idx].copy()
         display_df.index = range(start_idx + 1, min(end_idx + 1, total_rows + 1))
 
+        # Display table
         st.dataframe(
             display_df,
             height=300,
@@ -635,6 +629,7 @@ with st.container():
         )
         st.write(f"Wys {start_idx + 1} tot {end_idx} van {total_rows} insidente")
 
+        # Download full report
         st.download_button(
             label="Laai Verslag af as Word",
             data=generate_word_report(incident_log),
@@ -642,6 +637,7 @@ with st.container():
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
 
+        # Delete incident
         st.write("Verwyder 'n Insident")
         one_based_indices = list(range(1, total_rows + 1))
         st.markdown('<div class="input-label">Kies Insident om te Verwyder (deur Indeks)</div>', unsafe_allow_html=True)
@@ -661,7 +657,7 @@ with st.container():
         st.write("Geen insidente in die log nie.")
 
     st.subheader("Vandag se Insidente")
-    today = datetime.now(sa_tz).date()
+    today = datetime.now(pytz.timezone('Africa/Johannesburg')).date()
     today_incidents = incident_log[incident_log['Date'].dt.date == today]
     if not today_incidents.empty:
         st.write(f"Totale Insidente Vandag: {len(today_incidents)}")
