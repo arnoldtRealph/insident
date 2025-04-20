@@ -22,7 +22,7 @@ plt.rcParams['ytick.labelsize'] = 9
 # Set page config
 st.set_page_config(page_title="Insident Verslag", layout="wide")
 
-# Custom CSS for enhanced professional styling
+# Custom CSS for enhanced professional styling and mobile responsiveness
 st.markdown("""
     <style>
         /* General layout */
@@ -53,53 +53,54 @@ st.markdown("""
 
         /* Main content */
         .main .block-container {
-            padding: 30px;
+            padding: 40px;
             background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-            margin-bottom: 20px;
-            transition: transform 0.2s ease;
-            max-width: 1200px;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 1400px;
             margin-left: auto;
             margin-right: auto;
         }
         .main .block-container:hover {
-            transform: translateY(-2px);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
         }
 
         /* Headers */
         h1 {
             color: #1a3c34;
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             font-weight: 700;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             text-align: center;
             letter-spacing: 0.5px;
         }
         h2 {
             color: #2e5a52;
-            font-size: 1.75rem;
+            font-size: 2rem;
             font-weight: 600;
-            margin-top: 20px;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #e0e6ed;
-            padding-bottom: 5px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #e0e6ed;
+            padding-bottom: 8px;
             text-align: center;
         }
         h3 {
             color: #2e5a52;
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             font-weight: 500;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             text-align: center;
         }
 
         /* Input labels */
         .input-label {
             color: #2e5a52;
-            font-size: 2rem;
+            font-size: 1.2rem;
             font-weight: 500;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             display: block;
             text-align: center;
         }
@@ -112,22 +113,22 @@ st.markdown("""
             background-color: #1a3c34;
             color: #ffffff !important;
             border: none;
-            border-radius: 8px;
-            padding: 8px 12px;
-            font-size: 0.9rem;
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-size: 1rem;
             font-weight: 500;
             transition: all 0.3s ease;
-            max-width: 200px;
+            max-width: 250px;
             width: 100%;
-            margin: 8px auto;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 10px auto;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
             text-align: center;
             display: block;
         }
         .stButton>button:hover, .stDownloadButton>button:hover {
             background-color: #155e4f;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
         }
         .stButton>button:active, .stDownloadButton>button:active {
             background-color: #124a40;
@@ -153,10 +154,10 @@ st.markdown("""
         /* Dataframe styling */
         .stDataFrame {
             border: 1px solid #e0e6ed;
-            border-radius: 8px;
+            border-radius: 12px;
             overflow-x: auto;
             background-color: #ffffff;
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
         }
         .stDataFrame table {
@@ -168,9 +169,9 @@ st.markdown("""
             background-color: #e8ecef;
             color: #1a3c34;
             font-weight: 600;
-            padding: 12px;
+            padding: 15px;
             text-align: left;
-            font-size: 0.9rem;
+            font-size: 1rem;
             border-bottom: 2px solid #d3dbe3;
         }
         [data-theme="dark"] .stDataFrame th {
@@ -179,10 +180,10 @@ st.markdown("""
             border-bottom: 2px solid #4a5059;
         }
         .stDataFrame td {
-            padding: 12px;
+            padding: 15px;
             border-bottom: 1px solid #e0e6ed;
             color: #333333;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
         [data-theme="dark"] .stDataFrame td {
             color: #e0e0e0;
@@ -203,49 +204,56 @@ st.markdown("""
 
         /* Selectbox (dropdowns) */
         .stSelectbox {
-            background-color: #3af0a5;
+            background-color: #3af0c7;
             border: 1px solid #ced4da;
-            border-radius: 8px;
-            padding: 8px;
-            font-size: 0.95rem;
-            transition: border-color 0.3s ease;
-            max-width: 400px;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            max-width: 500px;
             width: 100%;
-            margin: 0 auto;
+            margin: 10px auto;
             display: block;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         [data-theme="dark"] .stSelectbox {
-            background-color: #3af0a5;
+            background-color: #3af0c7;
             border: 1px solid #4a5059;
             color: #333333;
         }
         .stSelectbox:hover {
             border-color: #1a3c34;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
         [data-theme="dark"] .stSelectbox:hover {
             border-color: #155e4f;
         }
+        .stSelectbox > div > div {
+            min-height: 48px; /* Larger touch target for mobile */
+        }
 
         /* Text area */
         .stTextArea {
-            background-color: #3af0a5;
+            background-color: #3af0c7;
             border: 1px solid #ced4da;
-            border-radius: 8px;
-            padding: 10px;
-            font-size: 0.95rem;
-            transition: border-color 0.3s ease;
-            max-width: 400px;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            max-width: 500px;
             width: 100%;
-            margin: 0 auto;
+            margin: 10px auto;
             display: block;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         [data-theme="dark"] .stTextArea {
-            background-color: #3af0a5;
+            background-color: #3af0c7;
             border: 1px solid #4a5059;
             color: #333333;
         }
         .stTextArea:hover {
             border-color: #1a3c34;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
         [data-theme="dark"] .stTextArea:hover {
             border-color: #155e4f;
@@ -254,18 +262,18 @@ st.markdown("""
         /* Text and labels */
         .stMarkdown, .stText {
             color: #333333;
-            font-size: 0.95rem;
+            font-size: 1rem;
             text-align: center;
         }
         [data-theme="dark"] .stMarkdown, [data-theme="dark"] .stText {
             color: #e0e0e0;
         }
         .stAlert {
-            border-radius: 8px;
-            font-size: 0.95rem;
-            padding: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            max-width: 600px;
+            border-radius: 10px;
+            font-size: 1rem;
+            padding: 15px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            max-width: 700px;
             margin: 0 auto;
         }
 
@@ -273,14 +281,15 @@ st.markdown("""
         .stTabs {
             display: flex;
             justify-content: center;
+            margin-bottom: 20px;
         }
         .stTabs [data-baseweb="tab"] {
             background-color: #e8ecef;
-            border-radius: 8px 8px 0 0;
-            padding: 10px 20px;
-            font-size: 0.95rem;
+            border-radius: 10px 10px 0 0;
+            padding: 12px 24px;
+            font-size: 1rem;
             color: #2e5a52;
-            margin-right: 5px;
+            margin-right: 6px;
             transition: all 0.3s ease;
         }
         .stTabs [data-baseweb="tab"]:hover {
@@ -289,7 +298,7 @@ st.markdown("""
         .stTabs [data-baseweb="tab"][aria-selected="true"] {
             background-color: #1a3c34;
             color: #ffffff;
-            font-weight: 500;
+            font-weight: 600;
         }
         [data-theme="dark"] .stTabs [data-baseweb="tab"] {
             background-color: #2e3238;
@@ -305,11 +314,11 @@ st.markdown("""
 
         /* Charts */
         .stPyplot {
-            border-radius: 8px;
-            padding: 10px;
+            border-radius: 12px;
+            padding: 15px;
             background-color: #ffffff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            max-width: 600px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            max-width: 700px;
             margin: 0 auto;
         }
         [data-theme="dark"] .stPyplot {
@@ -318,12 +327,13 @@ st.markdown("""
 
         /* Separator */
         .custom-divider {
-            border-top: 4px solid #e0e6ed;
-            margin: 30px auto;
-            max-width: 800px;
+            border-top: 5px solid #e0e6ed;
+            margin: 40px auto;
+            max-width: 900px;
+            border-radius: 2px;
         }
         [data-theme="dark"] .custom-divider {
-            border-top: 4px solid #4a5059;
+            border-top: 5px solid #4a5059;
         }
 
         /* Pagination form */
@@ -331,8 +341,8 @@ st.markdown("""
             display: flex;
             justify-content: center;
             align-items: center;
-            max-width: 600px;
-            margin: 0 auto;
+            max-width: 700px;
+            margin: 20px auto;
         }
         .pagination-form .stForm {
             display: flex;
@@ -341,7 +351,102 @@ st.markdown("""
         }
 
         /* Mobile optimization */
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
+            .main .block-container {
+                padding: 20px;
+                margin-bottom: 20px;
+                border-radius: 12px;
+            }
+            h1 {
+                font-size: 2.2rem;
+                margin-bottom: 20px;
+            }
+            h2 {
+                font-size: 1.8rem;
+                margin-top: 20px;
+                margin-bottom: 15px;
+            }
+            h3 {
+                font-size: 1.4rem;
+                margin-bottom: 12px;
+            }
+            .input-label {
+                font-size: 1.1rem;
+                margin-bottom: 8px;
+            }
+            .stButton>button, .stDownloadButton>button {
+                padding: 10px 16px;
+                font-size: 0.95rem;
+                max-width: 200px;
+                margin: 8px auto;
+                border-radius: 8px;
+            }
+            .stSelectbox {
+                font-size: 0.95rem;
+                padding: 10px;
+                max-width: 90%;
+                margin: 8px auto;
+                border-radius: 8px;
+                min-height: 50px; /* Larger touch target */
+            }
+            .stTextArea {
+                font-size: 0.95rem;
+                padding: 10px;
+                max-width: 90%;
+                margin: 8px auto;
+                border-radius: 8px;
+                min-height: 120px;
+            }
+            .stDataFrame {
+                max-width: 100%;
+                font-size: 0.9rem;
+            }
+            .stDataFrame th, .stDataFrame td {
+                padding: 10px;
+            }
+            .stPyplot {
+                max-width: 100%;
+            }
+            .stAlert {
+                max-width: 95%;
+                font-size: 0.9rem;
+                padding: 12px;
+            }
+            .stTabs {
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
+            .stTabs [data-baseweb="tab"] {
+                padding: 10px 16px;
+                font-size: 0.95rem;
+                margin-bottom: 5px;
+                border-radius: 8px;
+                flex: 1 1 auto;
+                text-align: center;
+            }
+            .custom-divider {
+                border-top: 4px solid #e0e6ed;
+                margin: 25px auto;
+                max-width: 95%;
+            }
+            [data-theme="dark"] .custom-divider {
+                border-top: 4px solid #4a5059;
+            }
+            .pagination-form {
+                max-width: 95%;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .pagination-form .stForm {
+                flex-direction: column;
+                align-items: center;
+            }
+            .pagination-form .stSelectbox {
+                max-width: 200px;
+            }
+        }
+
+        @media (max-width: 480px) {
             .main .block-container {
                 padding: 15px;
                 margin-bottom: 15px;
@@ -350,58 +455,34 @@ st.markdown("""
                 font-size: 2rem;
             }
             h2 {
-                font-size: 1.5rem;
+                font-size: 1.6rem;
             }
             h3 {
-                font-size: 1.2rem;
+                font-size: 1.3rem;
             }
             .input-label {
-                font-size: 0.9rem;
+                font-size: 1rem;
             }
             .stButton>button, .stDownloadButton>button {
-                padding: 6px 10px;
-                font-size: 0.85rem;
-                max-width: 150px;
-                margin: 8px auto;
-                display: block;
+                padding: 8px 14px;
+                font-size: 0.9rem;
+                max-width: 180px;
             }
             .stSelectbox {
                 font-size: 0.9rem;
-                padding: 6px;
-                max-width: 300px;
-                margin: 0 auto;
-                display: block;
+                padding: 8px;
+                max-width: 100%;
+                min-height: 48px;
             }
             .stTextArea {
                 font-size: 0.9rem;
-                padding: 6px;
-                max-width: 300px;
-                margin: 0 auto;
-                display: block;
-            }
-            .stDataFrame {
+                padding: 8px;
                 max-width: 100%;
-            }
-            .stPyplot {
-                max-width: 100%;
-            }
-            .stAlert {
-                max-width: 90%;
+                min-height: 100px;
             }
             .stTabs [data-baseweb="tab"] {
                 padding: 8px 12px;
-                font-size: 0.85rem;
-            }
-            .custom-divider {
-                border-top: 3px solid #e0e6ed;
-                margin: 20px auto;
-                max-width: 90%;
-            }
-            [data-theme="dark"] .custom-divider {
-                border-top: 3px solid #4a5059;
-            }
-            .pagination-form {
-                max-width: 90%;
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -729,7 +810,7 @@ with st.container():
     # Original main content
     st.subheader("Insident Log")
     if not incident_log.empty:
-        rows_per_page = 10
+        rows_per_page = 20
         total_rows = len(incident_log)
         total_pages = (total_rows + rows_per_page - 1) // rows_per_page
 
@@ -768,7 +849,7 @@ with st.container():
         # Display table
         st.dataframe(
             display_df,
-            height=300,
+            height=600,
             use_container_width=True,
             column_config={
                 "Learner_Full_Name": st.column_config.TextColumn("Leerder Naam", width="medium"),
@@ -922,17 +1003,38 @@ with st.container():
     with tab2:
         st.subheader("Weeklikse Opsomming")
         if not incident_log.empty:
+            # Create a pivot table for weekly incidents by category
             weekly_summary = incident_log.groupby([pd.Grouper(key='Date', freq='W-MON'), 'Category']).size().unstack(fill_value=0)
             weekly_summary.index = weekly_summary.index.strftime('%Y-%m-%d')
-            st.dataframe(weekly_summary, use_container_width=True, height=300)
-            fig, ax = plt.subplots(figsize=(4, 2.5))
-            weekly_summary.plot(kind='bar', ax=ax, color=sns.color_palette('Blues'))
-            ax.set_title('Weeklikse Insidente volgens Kategorie', pad=10, fontsize=12, weight='bold')
+            # Add total incidents per week
+            weekly_summary['Totaal'] = weekly_summary.sum(axis=1)
+            # Reset index to make 'Week Start' a column
+            weekly_summary = weekly_summary.reset_index().rename(columns={'Date': 'Week Begin (Maandag)'})
+            st.dataframe(
+                weekly_summary,
+                use_container_width=True,
+                height=300,
+                column_config={
+                    'Week Begin (Maandag)': st.column_config.TextColumn("Week Begin (Maandag)", width="medium"),
+                    'Totaal': st.column_config.NumberColumn("Totaal Insidente", width="small")
+                }
+            )
+            # Display total incidents per week
+            st.write("Totale Insidente per Week:")
+            for idx, row in weekly_summary.iterrows():
+                st.write(f"Week van {row['Week Begin (Maandag)']}: {int(row['Totaal'])} insidente")
+            
+            # Line chart for trends over time
+            fig, ax = plt.subplots(figsize=(6, 3))
+            for category in weekly_summary.columns[1:-1]:  # Exclude 'Week Begin' and 'Totaal'
+                sns.lineplot(x=weekly_summary['Week Begin (Maandag)'], y=weekly_summary[category], label=f'Kategorie {category}', ax=ax)
+            ax.set_title('Weeklikse Insident Tendense volgens Kategorie', pad=10, fontsize=12, weight='bold')
             ax.set_xlabel('Week Begin (Maandag)', fontsize=10)
-            ax.set_ylabel('Aantal', fontsize=10)
+            ax.set_ylabel('Aantal Insidente', fontsize=10)
             ax.yaxis.set_major_locator(MaxNLocator(integer=True))
             ax.tick_params(axis='x', rotation=45, labelsize=9)
             ax.tick_params(axis='y', labelsize=9)
+            ax.legend(fontsize=8, bbox_to_anchor=(1.05, 1), loc='upper left')
             plt.tight_layout(pad=1.0)
             st.pyplot(fig)
             plt.close()
