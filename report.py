@@ -110,7 +110,7 @@ st.markdown("""
 
         /* Buttons */
         .stButton>button, .stDownloadButton>button {
-            background-color: #1a3c34;
+            background-color: #28b463;
             color: #ffffff !important;
             border: none;
             border-radius: 10px;
@@ -204,7 +204,7 @@ st.markdown("""
 
         /* Selectbox (dropdowns) */
         .stSelectbox {
-            background-color: #3af0c7;
+            background-color: #2980b9;
             border: 1px solid #ced4da;
             border-radius: 10px;
             padding: 12px;
@@ -234,7 +234,7 @@ st.markdown("""
 
         /* Text area */
         .stTextArea {
-            background-color: #3af0c7;
+            background-color: #2980b9;
             border: 1px solid #ced4da;
             border-radius: 10px;
             padding: 12px;
@@ -511,7 +511,7 @@ def load_learner_data():
     np.random.seed(42)
     start_date = datetime(2024, 1, 1)
     date_range = [start_date + timedelta(days=int(x)) for x in np.random.randint(0, 365, size=len(df))]
-    df['Date'] = pd.to_datetime(date_range)
+    df['Date'] = pd.to_datetime(date_range).date
     return df
 
 # Load or initialize incident log
@@ -521,9 +521,7 @@ def load_incident_log():
         if 'Learner_Name' in df.columns and 'Learner_Full_Name' not in df.columns:
             df = df.rename(columns={'Learner_Name': 'Learner_Full_Name'})
         df['Category'] = pd.to_numeric(df['Category'], errors='coerce').fillna(1).astype(int).astype(str)
-        df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
-        sa_tz = pytz.timezone('Africa/Johannesburg')
-        df['Date'] = df['Date'].dt.tz_localize('UTC', ambiguous='infer', nonexistent='shift_forward').dt.tz_convert(sa_tz).dt.tz_localize(None)
+        df['Date'] = pd.to_datetime(df['Date'], errors='coerce').dt.date
         return df
     except FileNotFoundError:
         return pd.DataFrame(columns=['Learner_Full_Name', 'Class', 'Teacher', 'Incident', 'Category', 'Comment', 'Date'])
@@ -543,7 +541,7 @@ def save_incident(learner_full_name, class_, teacher, incident, category, commen
         'Incident': [incident],
         'Category': [category],
         'Comment': [comment],
-        'Date': [datetime.now(sa_tz).replace(tzinfo=None)]
+        'Date': [datetime.now(sa_tz).date()]
     })
     incident_log = pd.concat([incident_log, new_incident], ignore_index=True)
     incident_log.to_csv("incident_log.csv", index=False)
@@ -580,7 +578,7 @@ def generate_word_report(df):
         cells = table.add_row().cells
         for i, col in enumerate(df.columns):
             if col == 'Date':
-                cells[i].text = row[col].strftime("%Y-%m-%d %H:%M:%S")
+                cells[i].text = row[col].strftime("%Y-%m-%d")
             else:
                 cells[i].text = str(row[col])
 
@@ -689,7 +687,7 @@ def generate_learner_report(df, learner_full_name, period, start_date, end_date)
         cells = table.add_row().cells
         for i, col in enumerate(df.columns):
             if col == 'Date':
-                cells[i].text = row[col].strftime("%Y-%m-%d %H:%M:%S")
+                cells[i].text = row[col].strftime("%Y-%m-%d")
             else:
                 cells[i].text = str(row[col])
 
@@ -762,24 +760,21 @@ with st.container():
         report_period = st.selectbox("", options=['Daagliks', 'Weekliks', 'Maandelik', 'Kwartaalliks'], key="report_period")
 
         sa_tz = pytz.timezone('Africa/Johannesburg')
-        today = datetime.now(sa_tz).replace(hour=0, minute=0, second=0, microsecond=0)
+        today = datetime.now(sa_tz).date()
 
         if report_period == 'Daagliks':
             start_date = today
-            end_date = today + timedelta(days=1) - timedelta(seconds=1)
+            end_date = today
         elif report_period == 'Weekliks':
             start_date = today - timedelta(days=today.weekday())
-            end_date = start_date + timedelta(days=7) - timedelta(seconds=1)
+            end_date = start_date + timedelta(days=6)
         elif report_period == 'Maandelik':
             start_date = today.replace(day=1)
-            end_date = (start_date + timedelta(days=32)).replace(day=1) - timedelta(seconds=1)
+            end_date = (start_date + timedelta(days=31)).replace(day=1) - timedelta(days=1)
         else:  # Kwartaalliks
             quarter_start_month = ((today.month - 1) // 3) * 3 + 1
             start_date = today.replace(month=quarter_start_month, day=1)
-            end_date = (start_date + timedelta(days=92)).replace(day=1) - timedelta(seconds=1)
-
-        start_date = start_date.replace(tzinfo=None)
-        end_date = end_date.replace(tzinfo=None)
+            end_date = (start_date + timedelta(days=92)).replace(day=1) - timedelta(days=1)
 
         st.write(f"Verslag Datum Reeks: {start_date.strftime('%Y-%m-%d')} tot {end_date.strftime('%Y-%m-%d')}")
 
@@ -858,7 +853,7 @@ with st.container():
                 "Incident": st.column_config.TextColumn("Insident", width="medium"),
                 "Category": st.column_config.TextColumn("Kategorie", width="small"),
                 "Comment": st.column_config.TextColumn("Kommentaar", width="large"),
-                "Date": st.column_config.DatetimeColumn("Datum", width="medium", format="YYYY-MM-DD HH:mm:ss")
+                "Date": st.column_config.DateColumn("Datum", width="medium", format="YYYY-MM-DD")
             }
         )
         st.write(f"Wys {start_idx + 1} tot {end_idx} van {total_rows} insidente")
@@ -892,7 +887,7 @@ with st.container():
 
     st.subheader("Vandag se Insidente")
     today = datetime.now(pytz.timezone('Africa/Johannesburg')).date()
-    today_incidents = incident_log[incident_log['Date'].dt.date == today]
+    today_incidents = incident_log[incident_log['Date'] == today]
     if not today_incidents.empty:
         st.write(f"Totale Insidente Vandag: {len(today_incidents)}")
 
@@ -995,7 +990,7 @@ with st.container():
                 "Incident": st.column_config.TextColumn("Insident", width="medium"),
                 "Category": st.column_config.TextColumn("Kategorie", width="small"),
                 "Comment": st.column_config.TextColumn("Kommentaar", width="large"),
-                "Date": st.column_config.DatetimeColumn("Datum", width="medium", format="YYYY-MM-DD HH:mm:ss")
+                "Date": st.column_config.DateColumn("Datum", width="medium", format="YYYY-MM-DD")
             }
         )
         st.write(f"Totale Insidente: {len(filtered_df)}")
@@ -1003,8 +998,11 @@ with st.container():
     with tab2:
         st.subheader("Weeklikse Opsomming")
         if not incident_log.empty:
+            # Convert 'Date' to datetime for grouping
+            incident_log_dt = incident_log.copy()
+            incident_log_dt['Date'] = pd.to_datetime(incident_log_dt['Date'])
             # Create a pivot table for weekly incidents by category
-            weekly_summary = incident_log.groupby([pd.Grouper(key='Date', freq='W-MON'), 'Category']).size().unstack(fill_value=0)
+            weekly_summary = incident_log_dt.groupby([pd.Grouper(key='Date', freq='W-MON'), 'Category']).size().unstack(fill_value=0)
             weekly_summary.index = weekly_summary.index.strftime('%Y-%m-%d')
             # Add total incidents per week
             weekly_summary['Totaal'] = weekly_summary.sum(axis=1)
@@ -1024,17 +1022,21 @@ with st.container():
             for idx, row in weekly_summary.iterrows():
                 st.write(f"Week van {row['Week Begin (Maandag)']}: {int(row['Totaal'])} insidente")
             
-            # Line chart for trends over time
-            fig, ax = plt.subplots(figsize=(6, 3))
-            for category in weekly_summary.columns[1:-1]:  # Exclude 'Week Begin' and 'Totaal'
-                sns.lineplot(x=weekly_summary['Week Begin (Maandag)'], y=weekly_summary[category], label=f'Kategorie {category}', ax=ax)
-            ax.set_title('Weeklikse Insident Tendense volgens Kategorie', pad=10, fontsize=12, weight='bold')
+            # Stacked bar chart for weekly incidents by category
+            fig, ax = plt.subplots(figsize=(8, 4))
+            weekly_summary.set_index('Week Begin (Maandag)')[weekly_summary.columns[1:-1]].plot(
+                kind='bar', 
+                stacked=True, 
+                ax=ax, 
+                color=sns.color_palette('tab10', n_colors=len(weekly_summary.columns[1:-1]))
+            )
+            ax.set_title('Weeklikse Insidente volgens Kategorie', pad=10, fontsize=12, weight='bold')
             ax.set_xlabel('Week Begin (Maandag)', fontsize=10)
             ax.set_ylabel('Aantal Insidente', fontsize=10)
             ax.yaxis.set_major_locator(MaxNLocator(integer=True))
             ax.tick_params(axis='x', rotation=45, labelsize=9)
             ax.tick_params(axis='y', labelsize=9)
-            ax.legend(fontsize=8, bbox_to_anchor=(1.05, 1), loc='upper left')
+            ax.legend(title='Kategorie', fontsize=8, bbox_to_anchor=(1.05, 1), loc='upper left')
             plt.tight_layout(pad=1.0)
             st.pyplot(fig)
             plt.close()
@@ -1044,17 +1046,27 @@ with st.container():
     with tab3:
         st.subheader("Maandelikse Opsomming")
         if not incident_log.empty:
-            monthly_summary = incident_log.groupby([pd.Grouper(key='Date', freq='M'), 'Category']).size().unstack(fill_value=0)
+            # Convert 'Date' to datetime for grouping
+            incident_log_dt = incident_log.copy()
+            incident_log_dt['Date'] = pd.to_datetime(incident_log_dt['Date'])
+            monthly_summary = incident_log_dt.groupby([pd.Grouper(key='Date', freq='M'), 'Category']).size().unstack(fill_value=0)
             monthly_summary.index = monthly_summary.index.strftime('%Y-%m')
             st.dataframe(monthly_summary, use_container_width=True, height=300)
-            fig, ax = plt.subplots(figsize=(4, 2.5))
-            monthly_summary.plot(kind='bar', ax=ax, color=sns.color_palette('Blues'))
+            # Stacked bar chart for monthly incidents by category
+            fig, ax = plt.subplots(figsize=(8, 4))
+            monthly_summary.plot(
+                kind='bar', 
+                stacked=True, 
+                ax=ax, 
+                color=sns.color_palette('tab10', n_colors=len(monthly_summary.columns))
+            )
             ax.set_title('Maandelikse Insidente volgens Kategorie', pad=10, fontsize=12, weight='bold')
             ax.set_xlabel('Maand', fontsize=10)
-            ax.set_ylabel('Aantal', fontsize=10)
+            ax.set_ylabel('Aantal Insidente', fontsize=10)
             ax.yaxis.set_major_locator(MaxNLocator(integer=True))
             ax.tick_params(axis='x', rotation=45, labelsize=9)
             ax.tick_params(axis='y', labelsize=9)
+            ax.legend(title='Kategorie', fontsize=8, bbox_to_anchor=(1.05, 1), loc='upper left')
             plt.tight_layout(pad=1.0)
             st.pyplot(fig)
             plt.close()
@@ -1064,19 +1076,29 @@ with st.container():
     with tab4:
         st.subheader("Kwartaallikse Opsomming")
         if not incident_log.empty:
-            quarterly_summary = incident_log.groupby([pd.Grouper(key='Date', freq='Q'), 'Category']).size().unstack(fill_value=0)
+            # Convert 'Date' to datetime for grouping
+            incident_log_dt = incident_log.copy()
+            incident_log_dt['Date'] = pd.to_datetime(incident_log_dt['Date'])
+            quarterly_summary = incident_log_dt.groupby([pd.Grouper(key='Date', freq='Q'), 'Category']).size().unstack(fill_value=0)
             quarterly_summary.index = quarterly_summary.index.map(
                 lambda x: f"{x.year}-Q{(x.month-1)//3 + 1}"
             )
             st.dataframe(quarterly_summary, use_container_width=True, height=300)
-            fig, ax = plt.subplots(figsize=(4, 2.5))
-            quarterly_summary.plot(kind='bar', ax=ax, color=sns.color_palette('Blues'))
+            # Stacked bar chart for quarterly incidents by category
+            fig, ax = plt.subplots(figsize=(8, 4))
+            quarterly_summary.plot(
+                kind='bar', 
+                stacked=True, 
+                ax=ax, 
+                color=sns.color_palette('tab10', n_colors=len(quarterly_summary.columns))
+            )
             ax.set_title('Kwartaallikse Insidente volgens Kategorie', pad=10, fontsize=12, weight='bold')
             ax.set_xlabel('Kwartaal', fontsize=10)
-            ax.set_ylabel('Aantal', fontsize=10)
+            ax.set_ylabel('Aantal Insidente', fontsize=10)
             ax.yaxis.set_major_locator(MaxNLocator(integer=True))
             ax.tick_params(axis='x', rotation=45, labelsize=9)
             ax.tick_params(axis='y', labelsize=9)
+            ax.legend(title='Kategorie', fontsize=8, bbox_to_anchor=(1.05, 1), loc='upper left')
             plt.tight_layout(pad=1.0)
             st.pyplot(fig)
             plt.close()
