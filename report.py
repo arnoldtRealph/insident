@@ -583,6 +583,7 @@ def generate_word_report(df):
                 cells[i].text = str(row[col])
 
     doc.add_heading('Insident Analise', level=1)
+    
 
     # Bar chart: Incidents by Category
     fig, ax = plt.subplots(figsize=(4, 2.5))
@@ -657,6 +658,30 @@ def generate_word_report(df):
     plt.savefig(img_stream, format='png', dpi=100, bbox_inches='tight')
     plt.close()
     doc.add_picture(img_stream, width=Inches(3.5))
+
+    # Add High-Risk Learners section
+    doc.add_heading('Leerders met Herhalende Insidente', level=1)
+    incident_counts = df['Learner_Full_Name'].value_counts()
+    high_risk_learners = incident_counts[incident_counts > 2].index
+    high_risk_df = df[df['Learner_Full_Name'].isin(high_risk_learners)]
+
+    if not high_risk_df.empty:
+        table = doc.add_table(rows=1, cols=5)
+        table.style = 'Table Grid'
+        headers = ['Leerder Naam', 'Klas', 'Insident', 'Kategorie', 'Datum']
+        for i, header in enumerate(headers):
+            table.cell(0, i).text = header
+
+        for _, row in high_risk_df.iterrows():
+            cells = table.add_row().cells
+            cells[0].text = str(row['Learner_Full_Name'])
+            cells[1].text = str(row['Class'])
+            cells[2].text = str(row['Incident'])
+            cells[3].text = str(row['Category'])
+            cells[4].text = row['Date'].strftime("%Y-%m-%d")
+    else:
+        doc.add_paragraph("Geen leerders met herhalende insidente is tans gemerk nie.")
+
 
     doc_stream = io.BytesIO()
     doc.save(doc_stream)
@@ -1104,3 +1129,64 @@ with st.container():
             plt.close()
         else:
             st.write("Geen insidente om te wys nie.")
+
+            st.subheader("Leerders met Herhalende Insidente")
+
+# Count incidents per learner
+incident_counts = incident_log['Learner_Full_Name'].value_counts()
+high_risk_learners = incident_counts[incident_counts > 2].index  # pas drempel aan soos nodig
+
+# Filter incident log for high-risk learners
+high_risk_df = incident_log[incident_log['Learner_Full_Name'].isin(high_risk_learners)]
+
+if not high_risk_df.empty:
+    st.markdown("Hieronder is leerders met meer as twee insidente, aangedui as areas van kommer.")
+
+    styled_html = """
+    <style>
+        .red-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+            background-color: #ffcccc;
+            color: #000;
+            font-size: 15px;
+        }
+        .red-table th {
+            background-color: #cc0000;
+            color: white;
+            padding: 10px;
+        }
+        .red-table td {
+            padding: 10px;
+            border: 1px solid #990000;
+        }
+        .red-table tr:hover {
+            background-color: #ff9999;
+        }
+    </style>
+    """
+
+    # Build HTML table
+    table_html = "<table class='red-table'><thead><tr>"
+    for col in ['Leerder Naam', 'Klas', 'Insident', 'Kategorie', 'Datum']:
+        table_html += f"<th>{col}</th>"
+    table_html += "</tr></thead><tbody>"
+
+    for _, row in high_risk_df.iterrows():
+        table_html += "<tr>"
+        table_html += f"<td>{row['Learner_Full_Name']}</td>"
+        table_html += f"<td>{row['Class']}</td>"
+        table_html += f"<td>{row['Incident']}</td>"
+        table_html += f"<td>{row['Category']}</td>"
+        table_html += f"<td>{row['Date']}</td>"
+        table_html += "</tr>"
+
+    table_html += "</tbody></table>"
+
+    st.markdown(styled_html + table_html, unsafe_allow_html=True)
+else:
+    st.info("Geen leerders met herhalende insidente is tans gemerk nie.")
+
+
+            
