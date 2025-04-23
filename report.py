@@ -10,8 +10,6 @@ import io
 import pytz
 from matplotlib.ticker import MaxNLocator
 import uuid
-from github import Github
-import base64
 
 # Set seaborn style for professional charts
 sns.set_style("whitegrid")
@@ -528,7 +526,7 @@ def load_incident_log():
     except FileNotFoundError:
         return pd.DataFrame(columns=['Learner_Full_Name', 'Class', 'Teacher', 'Incident', 'Category', 'Comment', 'Date'])
 
-# Save incident to log and push to GitHub
+# Save incident to log
 def save_incident(learner_full_name, class_, teacher, incident, category, comment):
     incident_log = load_incident_log()
     sa_tz = pytz.timezone('Africa/Johannesburg')
@@ -547,68 +545,14 @@ def save_incident(learner_full_name, class_, teacher, incident, category, commen
     })
     incident_log = pd.concat([incident_log, new_incident], ignore_index=True)
     incident_log.to_csv("incident_log.csv", index=False)
-
-    # Push to GitHub
-    try:
-        g = Github(st.secrets["GITHUB_TOKEN"])
-        repo = g.get_repo("arnoldtRealph/insident")
-        with open("incident_log.csv", "rb") as file:
-            content = file.read()
-        repo_path = "incident_log.csv"
-        try:
-            contents = repo.get_contents(repo_path, ref="master")
-            repo.update_file(
-                path=repo_path,
-                message="Updated incident_log.csv with new incident",
-                content=content,
-                sha=contents.sha,
-                branch="master"
-            )
-        except:
-            repo.create_file(
-                path=repo_path,
-                message="Created incident_log.csv with new incident",
-                content=content,
-                branch="master"
-            )
-    except Exception as e:
-        st.error(f"Kon nie na GitHub stoot nie: {e}")
-
     return incident_log
 
-# Clear a single incident and push to GitHub
+# Clear a single incident
 def clear_incident(index):
     incident_log = load_incident_log()
     if index in incident_log.index:
         incident_log = incident_log.drop(index)
         incident_log.to_csv("incident_log.csv", index=False)
-
-        # Push to GitHub
-        try:
-            g = Github(st.secrets["GITHUB_TOKEN"])
-            repo = g.get_repo("arnoldtRealph/insident")
-            with open("incident_log.csv", "rb") as file:
-                content = file.read()
-            repo_path = "incident_log.csv"
-            try:
-                contents = repo.get_contents(repo_path, ref="master")
-                repo.update_file(
-                    path=repo_path,
-                    message="Updated incident_log.csv after clearing incident",
-                    content=content,
-                    sha=contents.sha,
-                    branch="master"
-                )
-            except:
-                repo.create_file(
-                    path=repo_path,
-                    message="Created incident_log.csv after clearing incident",
-                    content=content,
-                    branch="master"
-                )
-        except Exception as e:
-            st.error(f"Kon nie na GitHub stoot nie: {e}")
-
         return incident_log
     return incident_log
 
@@ -640,6 +584,7 @@ def generate_word_report(df):
 
     doc.add_heading('Insident Analise', level=1)
     
+
     # Bar chart: Incidents by Category
     fig, ax = plt.subplots(figsize=(4, 2.5))
     category_counts = df['Category'].value_counts().sort_index()
@@ -736,6 +681,7 @@ def generate_word_report(df):
             cells[4].text = row['Date'].strftime("%Y-%m-%d")
     else:
         doc.add_paragraph("Geen leerders met herhalende insidente is tans gemerk nie.")
+
 
     doc_stream = io.BytesIO()
     doc.save(doc_stream)
@@ -1184,60 +1130,63 @@ with st.container():
         else:
             st.write("Geen insidente om te wys nie.")
 
-    st.subheader("Leerders met Herhalende Insidente")
+            st.subheader("Leerders met Herhalende Insidente")
 
-    # Count incidents per learner
-    incident_counts = incident_log['Learner_Full_Name'].value_counts()
-    high_risk_learners = incident_counts[incident_counts > 2].index  # pas drempel aan soos nodig
+# Count incidents per learner
+incident_counts = incident_log['Learner_Full_Name'].value_counts()
+high_risk_learners = incident_counts[incident_counts > 2].index  # pas drempel aan soos nodig
 
-    # Filter incident log for high-risk learners
-    high_risk_df = incident_log[incident_log['Learner_Full_Name'].isin(high_risk_learners)]
+# Filter incident log for high-risk learners
+high_risk_df = incident_log[incident_log['Learner_Full_Name'].isin(high_risk_learners)]
 
-    if not high_risk_df.empty:
-        st.markdown("Hieronder is leerders met meer as twee insidente, aangedui as areas van kommer.")
+if not high_risk_df.empty:
+    st.markdown("Hieronder is leerders met meer as twee insidente, aangedui as areas van kommer.")
 
-        styled_html = """
-        <style>
-            .red-table {
-                border-collapse: collapse;
-                width: 100%;
-                margin-top: 20px;
-                background-color: #ffcccc;
-                color: #000;
-                font-size: 15px;
-            }
-            .red-table th {
-                background-color: #cc0000;
-                color: white;
-                padding: 10px;
-            }
-            .red-table td {
-                padding: 10px;
-                border: 1px solid #990000;
-            }
-            .red-table tr:hover {
-                background-color: #ff9999;
-            }
-        </style>
-        """
+    styled_html = """
+    <style>
+        .red-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+            background-color: #ffcccc;
+            color: #000;
+            font-size: 15px;
+        }
+        .red-table th {
+            background-color: #cc0000;
+            color: white;
+            padding: 10px;
+        }
+        .red-table td {
+            padding: 10px;
+            border: 1px solid #990000;
+        }
+        .red-table tr:hover {
+            background-color: #ff9999;
+        }
+    </style>
+    """
 
-        # Build HTML table
-        table_html = "<table class='red-table'><thead><tr>"
-        for col in ['Leerder Naam', 'Klas', 'Insident', 'Kategorie', 'Datum']:
-            table_html += f"<th>{col}</th>"
-        table_html += "</tr></thead><tbody>"
+    # Build HTML table
+    table_html = "<table class='red-table'><thead><tr>"
+    for col in ['Leerder Naam', 'Klas', 'Insident', 'Kategorie', 'Datum']:
+        table_html += f"<th>{col}</th>"
+    table_html += "</tr></thead><tbody>"
 
-        for _, row in high_risk_df.iterrows():
-            table_html += "<tr>"
-            table_html += f"<td>{row['Learner_Full_Name']}</td>"
-            table_html += f"<td>{row['Class']}</td>"
-            table_html += f"<td>{row['Incident']}</td>"
-            table_html += f"<td>{row['Category']}</td>"
-            table_html += f"<td>{row['Date']}</td>"
-            table_html += "</tr>"
+    for _, row in high_risk_df.iterrows():
+        table_html += "<tr>"
+        table_html += f"<td>{row['Learner_Full_Name']}</td>"
+        table_html += f"<td>{row['Class']}</td>"
+        table_html += f"<td>{row['Incident']}</td>"
+        table_html += f"<td>{row['Category']}</td>"
+        table_html += f"<td>{row['Date']}</td>"
+        table_html += "</tr>"
 
-        table_html += "</tbody></table>"
+    table_html += "</tbody></table>"
 
-        st.markdown(styled_html + table_html, unsafe_allow_html=True)
-    else:
-        st.info("Geen leerders met herhalende insidente is tans gemerk nie.")
+    st.markdown(styled_html + table_html, unsafe_allow_html=True)
+else:
+    st.info("Geen leerders met herhalende insidente is tans gemerk nie.")
+
+
+            
