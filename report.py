@@ -853,28 +853,28 @@ if not incident_log.empty:
                 'Learner': learner,
                 'Category': '1',
                 'Count': int(row['1']),
-                'Sanction': 'Ouers moet afspraak maak met Mnr. Zealand; leerder mag nie skool bywoon voor ouer-vergadering nie.'
+                'Sanction': 'Ouers moet afspraak maak met Mnr. Zealand; leerder mag nie skool bywoon voor ouers nie by die skool was nie.'
             })
         if row['2'] > 5:
             sanctions.append({
                 'Learner': learner,
                 'Category': '2',
                 'Count': int(row['2']),
-                'Sanction': 'Ouers moet afspraak maak met Mnr. Zealand; leerder mag nie skool bywoon voor ouer-vergadering nie.'
+                'Sanction': 'Ouers moet afspraak maak met Mnr. Zealand; leerder mag nie skool bywoon voor ouers nie by die skool was nie.'
             })
         if row['3'] > 2:
             sanctions.append({
                 'Learner': learner,
                 'Category': '3',
                 'Count': int(row['3']),
-                'Sanction': 'Ouers moet afspraak maak met Mnr. Zealand; leerder mag nie skool bywoon voor ouer-vergadering nie.'
+                'Sanction': 'Ouers moet afspraak maak met Mnr. Zealand; leerder mag nie skool bywoon voor ouers nie by die skool was nie.'
             })
         if row['4'] >= 1:
             sanctions.append({
                 'Learner': learner,
                 'Category': '4',
                 'Count': int(row['4']),
-                'Sanction': 'Leerder moet uitgeskors word.'
+                'Sanction': 'Leerder moet geskors word.'
             })
 
     sanctions_df = pd.DataFrame(sanctions)
