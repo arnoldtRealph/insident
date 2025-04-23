@@ -6,4 +6,4 @@ matplotlib
 seaborn
 pillow
 pytz
-github
+pygithub
