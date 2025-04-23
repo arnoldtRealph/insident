@@ -806,7 +806,118 @@ incident_log = load_incident_log()
 with st.container():
     st.title("HOËRSKOOL SAUL DAMON")
     st.subheader("INSIDENT VERSLAG")
+# Add CSS for top-right notifications
+st.markdown("""
+    <style>
+        .notification-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 300px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        [data-theme="dark"] .notification-container {
+            background-color: transparent;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
+# Initialize session state for sanction notifications
+if 'sanction_popups' not in st.session_state:
+    st.session_state.sanction_popups = {}
+
+# Compute sanctions based on incident counts
+if not incident_log.empty:
+    # Tally incidents by learner and category
+    tally_df = incident_log.pivot_table(
+        index='Learner_Full_Name',
+        columns='Category',
+        values='Incident',
+        aggfunc='count',
+        fill_value=0
+    )
+    for cat in ['1', '2', '3', '4']:
+        if cat not in tally_df.columns:
+            tally_df[cat] = 0
+    tally_df = tally_df[['1', '2', '3', '4']].reset_index()
+
+    # Identify learners meeting sanction criteria
+    sanctions = []
+    for _, row in tally_df.iterrows():
+        learner = row['Learner_Full_Name']
+        if row['1'] > 10:
+            sanctions.append({
+                'Learner': learner,
+                'Category': '1',
+                'Count': int(row['1']),
+                'Sanction': 'Ouers moet afspraak maak met Mnr. Zealand; leerder mag nie skool bywoon voor ouer-vergadering nie.'
+            })
+        if row['2'] > 5:
+            sanctions.append({
+                'Learner': learner,
+                'Category': '2',
+                'Count': int(row['2']),
+                'Sanction': 'Ouers moet afspraak maak met Mnr. Zealand; leerder mag nie skool bywoon voor ouer-vergadering nie.'
+            })
+        if row['3'] > 2:
+            sanctions.append({
+                'Learner': learner,
+                'Category': '3',
+                'Count': int(row['3']),
+                'Sanction': 'Ouers moet afspraak maak met Mnr. Zealand; leerder mag nie skool bywoon voor ouer-vergadering nie.'
+            })
+        if row['4'] >= 1:
+            sanctions.append({
+                'Learner': learner,
+                'Category': '4',
+                'Count': int(row['4']),
+                'Sanction': 'Leerder moet uitgeskors word.'
+            })
+
+    sanctions_df = pd.DataFrame(sanctions)
+
+    # Populate session state with new sanctions
+    for _, row in sanctions_df.iterrows():
+        key = f"{row['Learner']}_{row['Category']}"
+        if key not in st.session_state.sanction_popups:
+            st.session_state.sanction_popups[key] = True
+
+    # Display sanction notifications in top-right corner
+    with st.container():
+        st.markdown('<div class="notification-container">', unsafe_allow_html=True)
+        any_notifications = False
+        for _, row in sanctions_df.iterrows():
+            key = f"{row['Learner']}_{row['Category']}"
+            if st.session_state.sanction_popups.get(key, False):
+                any_notifications = True
+                st.markdown(
+                    f"""
+                    <div style='background-color: #ffe6e6; padding: 15px; border-radius: 8px; border: 2px solid #cc0000;'>
+                        <h4 style='color: #cc0000; margin: 0;'>SANKSIEMELDING</h4>
+                        <p style='color: #333; margin: 5px 0; font-size: 0.9rem;'>
+                            Leerder <strong>{row['Learner']}</strong> het {row['Count']} Kategorie {row['Category']} insidente. 
+                            Sanksie: {row['Sanction']}
+                        </p>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+                if st.button("Opgelos", key=f"sanction_resolve_{key}"):
+                    st.session_state.sanction_popups[key] = False
+                    st.rerun()
+        if not any_notifications:
+            st.markdown(
+                """
+                <div style='background-color: #e6f3e6; padding: 15px; border-radius: 8px; border: 2px solid #28b463;'>
+                    <p style='color: #333; margin: 0; font-size: 0.9rem;'>Geen aktiewe sanksiemeldings nie.</p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+        st.markdown('</div>', unsafe_allow_html=True)
     # Former sidebar content: Report New Incident
     st.header("Rapporteer Nuwe Insident")
     with st.container():
@@ -991,16 +1102,16 @@ with st.container():
         plt.close()
 
         st.write("Insidente volgens Tipe")
-        fig, ax = plt.subplots(figsize=(4, 2.5))
+        fig, ax = plt.subplots(figsize=(10, 5))
         incident_counts = today_incidents['Incident'].value_counts()
         sns.barplot(x=incident_counts.index, y=incident_counts.values, ax=ax, palette='Blues')
-        ax.set_title('Insidente volgens Tipe (Vandag)', pad=10, fontsize=12, weight='bold')
-        ax.set_xlabel('Insident', fontsize=10)
-        ax.set_ylabel('Aantal', fontsize=10)
+        ax.set_title('Insidente volgens Tipe (Vandag)', pad=8, fontsize=10, weight='bold')
+        ax.set_xlabel('Insident', fontsize=8)
+        ax.set_ylabel('Aantal', fontsize=8)
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-        ax.tick_params(axis='x', rotation=60, labelsize=9)
-        ax.tick_params(axis='y', labelsize=9)
-        plt.tight_layout(pad=1.0)
+        ax.tick_params(axis='x', rotation=45, labelsize=6)
+        ax.tick_params(axis='y', labelsize=7)
+        plt.tight_layout(pad=1.5)
         st.pyplot(fig)
         plt.close()
 
