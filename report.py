@@ -30,116 +30,112 @@ st.markdown("""
     <style>
         /* General layout */
         .stApp {
-            background-color: #f5f7fa;
-            font-family: 'Roboto', sans-serif;
-            color: #333333;
+            background-color: #f8f9fa;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            color: #212529;
             text-align: center;
         }
         [data-baseweb="baseweb"] {
-            background-color: #f5f7fa !important;
+            background-color: #f8f9fa !important;
         }
 
         /* Dark mode adjustments */
         [data-theme="dark"] .stApp, [data-theme="dark"] [data-baseweb="baseweb"] {
-            background-color: #1a1d21 !important;
-            color: #e0e0e0 !important;
+            background-color: #212529 !important;
+            color: #e9ecef !important;
         }
         [data-theme="dark"] .main .block-container {
-            background-color: #2a2e34 !important;
-            color: #e0e0e0 !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            background-color: #343a40 !important;
+            color: #e9ecef !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
         [data-theme="dark"] .stMarkdown, [data-theme="dark"] .stText, 
         [data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3 {
-            color: #e0e0e0 !important;
+            color: #e9ecef !important;
         }
 
         /* Main content */
         .main .block-container {
-            padding: 40px;
+            padding: 2rem;
             background-color: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            max-width: 1400px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            max-width: 1200px;
             margin-left: auto;
             margin-right: auto;
+            transition: box-shadow 0.3s ease;
         }
         .main .block-container:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
         }
 
         /* Headers */
         h1 {
-            color: #1a3c34;
-            font-size: 2.8rem;
+            color: #003087;
+            font-size: 2.5rem;
             font-weight: 700;
-            margin-bottom: 25px;
+            margin-bottom: 1.5rem;
             text-align: center;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.02em;
         }
         h2 {
-            color: #2e5a52;
-            font-size: 2rem;
+            color: #003087;
+            font-size: 1.8rem;
             font-weight: 600;
-            margin-top: 30px;
-            margin-bottom: 20px;
-            border-bottom: 3px solid #e0e6ed;
-            padding-bottom: 8px;
+            margin: 1.5rem 0 1rem;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 0.5rem;
             text-align: center;
         }
         h3 {
-            color: #2e5a52;
-            font-size: 1.5rem;
+            color: #003087;
+            font-size: 1.4rem;
             font-weight: 500;
-            margin-bottom: 15px;
+            margin-bottom: 1rem;
             text-align: center;
         }
 
         /* Input labels */
         .input-label {
-            color: #2e5a52;
-            font-size: 1.2rem;
+            color: #003087;
+            font-size: 1.1rem;
             font-weight: 500;
-            margin-bottom: 10px;
+            margin-bottom: 0.5rem;
             display: block;
             text-align: center;
         }
         [data-theme="dark"] .input-label {
-            color: #e0e0e0 !important;
+            color: #e9ecef !important;
         }
 
         /* Buttons */
         .stButton>button, .stDownloadButton>button {
-            background-color: #28b463;
+            background-color: #003087;
             color: #ffffff !important;
             border: none;
-            border-radius: 10px;
-            padding: 12px 20px;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
             font-size: 1rem;
             font-weight: 500;
             transition: all 0.3s ease;
-            max-width: 250px;
+            max-width: 200px;
             width: 100%;
-            margin: 10px auto;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            margin: 0.5rem auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             text-align: center;
             display: block;
         }
         .stButton>button:hover, .stDownloadButton>button:hover {
-            background-color: #155e4f;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+            background-color: #00205b;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         .stButton>button:active, .stDownloadButton>button:active {
-            background-color: #124a40;
-            transform: translateY(0);
+            background-color: #001a4d;
         }
         .stButton>button:disabled, .stDownloadButton>button:disabled {
-            background-color: #a0a9b2;
-            color: #d3d3d3 !important;
+            background-color: #6c757d;
+            color: #ced4da !important;
             box-shadow: none;
         }
 
@@ -156,11 +152,11 @@ st.markdown("""
 
         /* Dataframe styling */
         .stDataFrame {
-            border: 1px solid #e0e6ed;
-            border-radius: 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
             overflow-x: auto;
             background-color: #ffffff;
-            max-width: 1200px;
+            max-width: 100%;
             margin: 0 auto;
         }
         .stDataFrame table {
@@ -169,114 +165,114 @@ st.markdown("""
             border-spacing: 0;
         }
         .stDataFrame th {
-            background-color: #e8ecef;
-            color: #1a3c34;
+            background-color: #e9ecef;
+            color: #003087;
             font-weight: 600;
-            padding: 15px;
+            padding: 0.75rem;
             text-align: left;
-            font-size: 1rem;
-            border-bottom: 2px solid #d3dbe3;
+            font-size: 0.95rem;
+            border-bottom: 2px solid #dee2e6;
         }
         [data-theme="dark"] .stDataFrame th {
-            background-color: #3a3f46;
-            color: #e0e0e0;
-            border-bottom: 2px solid #4a5059;
+            background-color: #495057;
+            color: #e9ecef;
+            border-bottom: 2px solid #6c757d;
         }
         .stDataFrame td {
-            padding: 15px;
-            border-bottom: 1px solid #e0e6ed;
-            color: #333333;
-            font-size: 0.95rem;
+            padding: 0.75rem;
+            border-bottom: 1px solid #dee2e6;
+            color: #212529;
+            font-size: 0.9rem;
         }
         [data-theme="dark"] .stDataFrame td {
-            color: #e0e0e0;
-            border-bottom: 1px solid #4a5059;
+            color: #e9ecef;
+            border-bottom: 1px solid #6c757d;
         }
         .stDataFrame tr:nth-child(even) {
-            background-color: #f9fafc;
+            background-color: #f8f9fa;
         }
         [data-theme="dark"] .stDataFrame tr:nth-child(even) {
-            background-color: #2e3238;
+            background-color: #343a40;
         }
         .stDataFrame tr:hover {
-            background-color: #e8ecef;
+            background-color: #e9ecef;
         }
         [data-theme="dark"] .stDataFrame tr:hover {
-            background-color: #3a3f46;
+            background-color: #495057;
         }
 
         /* Selectbox (dropdowns) */
         .stSelectbox {
-            background-color: #2980b9;
+            background-color: #ffffff;
             border: 1px solid #ced4da;
-            border-radius: 10px;
-            padding: 12px;
-            font-size: 1rem;
+            border-radius: 8px;
+            padding: 0.5rem;
+            font-size: 0.95rem;
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
-            max-width: 500px;
+            max-width: 400px;
             width: 100%;
-            margin: 10px auto;
+            margin: 0.5rem auto;
             display: block;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         [data-theme="dark"] .stSelectbox {
-            background-color: #3af0c7;
-            border: 1px solid #4a5059;
-            color: #333333;
+            background-color: #495057;
+            border: 1px solid #6c757d;
+            color: #e9ecef;
         }
         .stSelectbox:hover {
-            border-color: #1a3c34;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            border-color: #003087;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
         }
         [data-theme="dark"] .stSelectbox:hover {
-            border-color: #155e4f;
+            border-color: #e9ecef;
         }
         .stSelectbox > div > div {
-            min-height: 48px; /* Larger touch target for mobile */
+            min-height: 40px;
         }
 
         /* Text area */
         .stTextArea {
-            background-color: #2980b9;
+            background-color: #ffffff;
             border: 1px solid #ced4da;
-            border-radius: 10px;
-            padding: 12px;
-            font-size: 1rem;
+            border-radius: 8px;
+            padding: 0.5rem;
+            font-size: 0.95rem;
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
-            max-width: 500px;
+            max-width: 400px;
             width: 100%;
-            margin: 10px auto;
+            margin: 0.5rem auto;
             display: block;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         [data-theme="dark"] .stTextArea {
-            background-color: #3af0c7;
-            border: 1px solid #4a5059;
-            color: #333333;
+            background-color: #495057;
+            border: 1px solid #6c757d;
+            color: #e9ecef;
         }
         .stTextArea:hover {
-            border-color: #1a3c34;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            border-color: #003087;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
         }
         [data-theme="dark"] .stTextArea:hover {
-            border-color: #155e4f;
+            border-color: #e9ecef;
         }
 
         /* Text and labels */
         .stMarkdown, .stText {
-            color: #333333;
-            font-size: 1rem;
+            color: #212529;
+            font-size: 0.95rem;
             text-align: center;
         }
         [data-theme="dark"] .stMarkdown, [data-theme="dark"] .stText {
-            color: #e0e0e0;
+            color: #e9ecef;
         }
         .stAlert {
-            border-radius: 10px;
-            font-size: 1rem;
-            padding: 15px;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-            max-width: 700px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            padding: 0.75rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 600px;
             margin: 0 auto;
         }
 
@@ -284,59 +280,59 @@ st.markdown("""
         .stTabs {
             display: flex;
             justify-content: center;
-            margin-bottom: 20px;
+            margin-bottom: 1.5rem;
         }
         .stTabs [data-baseweb="tab"] {
-            background-color: #e8ecef;
-            border-radius: 10px 10px 0 0;
-            padding: 12px 24px;
-            font-size: 1rem;
-            color: #2e5a52;
-            margin-right: 6px;
+            background-color: #e9ecef;
+            border-radius: 8px 8px 0 0;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            color: #003087;
+            margin-right: 0.5rem;
             transition: all 0.3s ease;
         }
         .stTabs [data-baseweb="tab"]:hover {
-            background-color: #d3dbe3;
+            background-color: #dee2e6;
         }
         .stTabs [data-baseweb="tab"][aria-selected="true"] {
-            background-color: #1a3c34;
+            background-color: #003087;
             color: #ffffff;
             font-weight: 600;
         }
         [data-theme="dark"] .stTabs [data-baseweb="tab"] {
-            background-color: #2e3238;
-            color: #e0e0e0;
+            background-color: #343a40;
+            color: #e9ecef;
         }
         [data-theme="dark"] .stTabs [data-baseweb="tab"]:hover {
-            background-color: #3a3f46;
+            background-color: #495057;
         }
         [data-theme="dark"] .stTabs [data-baseweb="tab"][aria-selected="true"] {
-            background-color: #155e4f;
+            background-color: #007bff;
             color: #ffffff;
         }
 
         /* Charts */
         .stPyplot {
-            border-radius: 12px;
-            padding: 15px;
+            border-radius: 8px;
+            padding: 0.75rem;
             background-color: #ffffff;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-            max-width: 700px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 600px;
             margin: 0 auto;
         }
         [data-theme="dark"] .stPyplot {
-            background-color: #2e3238;
+            background-color: #343a40;
         }
 
         /* Separator */
         .custom-divider {
-            border-top: 5px solid #e0e6ed;
-            margin: 40px auto;
-            max-width: 900px;
+            border-top: 3px solid #dee2e6;
+            margin: 2rem auto;
+            max-width: 800px;
             border-radius: 2px;
         }
         [data-theme="dark"] .custom-divider {
-            border-top: 5px solid #4a5059;
+            border-top: 3px solid #6c757d;
         }
 
         /* Pagination form */
@@ -344,148 +340,162 @@ st.markdown("""
             display: flex;
             justify-content: center;
             align-items: center;
-            max-width: 700px;
-            margin: 20px auto;
+            max-width: 600px;
+            margin: 1.5rem auto;
         }
         .pagination-form .stForm {
             display: flex;
             justify-content: center;
             width: 100%;
+            gap: 0.5rem;
+        }
+
+        /* Notification container */
+        .notification-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            width: 280px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
         /* Mobile optimization */
         @media (max-width: 768px) {
             .main .block-container {
-                padding: 20px;
-                margin-bottom: 20px;
-                border-radius: 12px;
-            }
-            h1 {
-                font-size: 2.2rem;
-                margin-bottom: 20px;
-            }
-            h2 {
-                font-size: 1.8rem;
-                margin-top: 20px;
-                margin-bottom: 15px;
-            }
-            h3 {
-                font-size: 1.4rem;
-                margin-bottom: 12px;
-            }
-            .input-label {
-                font-size: 1.1rem;
-                margin-bottom: 8px;
-            }
-            .stButton>button, .stDownloadButton>button {
-                padding: 10px 16px;
-                font-size: 0.95rem;
-                max-width: 200px;
-                margin: 8px auto;
-                border-radius: 8px;
-            }
-            .stSelectbox {
-                font-size: 0.95rem;
-                padding: 10px;
-                max-width: 90%;
-                margin: 8px auto;
-                border-radius: 8px;
-                min-height: 50px; /* Larger touch target */
-            }
-            .stTextArea {
-                font-size: 0.95rem;
-                padding: 10px;
-                max-width: 90%;
-                margin: 8px auto;
-                border-radius: 8px;
-                min-height: 120px;
-            }
-            .stDataFrame {
-                max-width: 100%;
-                font-size: 0.9rem;
-            }
-            .stDataFrame th, .stDataFrame td {
-                padding: 10px;
-            }
-            .stPyplot {
-                max-width: 100%;
-            }
-            .stAlert {
-                max-width: 95%;
-                font-size: 0.9rem;
-                padding: 12px;
-            }
-            .stTabs {
-                flex-wrap: wrap;
-                justify-content: flex-start;
-            }
-            .stTabs [data-baseweb="tab"] {
-                padding: 10px 16px;
-                font-size: 0.95rem;
-                margin-bottom: 5px;
-                border-radius: 8px;
-                flex: 1 1 auto;
-                text-align: center;
-            }
-            .custom-divider {
-                border-top: 4px solid #e0e6ed;
-                margin: 25px auto;
-                max-width: 95%;
-            }
-            [data-theme="dark"] .custom-divider {
-                border-top: 4px solid #4a5059;
-            }
-            .pagination-form {
-                max-width: 95%;
-                flex-direction: column;
-                gap: 10px;
-            }
-            .pagination-form .stForm {
-                flex-direction: column;
-                align-items: center;
-            }
-            .pagination-form .stSelectbox {
-                max-width: 200px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .main .block-container {
-                padding: 15px;
-                margin-bottom: 15px;
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+                border-radius: 10px;
             }
             h1 {
                 font-size: 2rem;
             }
             h2 {
                 font-size: 1.6rem;
+                margin: 1.25rem 0 0.75rem;
             }
             h3 {
                 font-size: 1.3rem;
+                margin-bottom: 0.75rem;
             }
             .input-label {
                 font-size: 1rem;
             }
             .stButton>button, .stDownloadButton>button {
-                padding: 8px 14px;
+                padding: 0.6rem 1.2rem;
                 font-size: 0.9rem;
                 max-width: 180px;
+                border-radius: 6px;
             }
             .stSelectbox {
                 font-size: 0.9rem;
-                padding: 8px;
-                max-width: 100%;
-                min-height: 48px;
+                padding: 0.4rem;
+                max-width: 90%;
+                border-radius: 6px;
+                min-height: 38px;
             }
             .stTextArea {
                 font-size: 0.9rem;
-                padding: 8px;
-                max-width: 100%;
+                padding: 0.4rem;
+                max-width: 90%;
+                border-radius: 6px;
                 min-height: 100px;
             }
+            .stDataFrame {
+                max-width: 100%;
+                font-size: 0.85rem;
+            }
+            .stDataFrame th, .stDataFrame td {
+                padding: 0.6rem;
+            }
+            .stPyplot {
+                max-width: 100%;
+            }
+            .stAlert {
+                max-width: 95%;
+                font-size: 0.85rem;
+                padding: 0.6rem;
+            }
+            .stTabs {
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
             .stTabs [data-baseweb="tab"] {
-                padding: 8px 12px;
+                padding: 0.6rem 1.2rem;
                 font-size: 0.9rem;
+                margin-bottom: 0.4rem;
+                border-radius: 6px;
+                flex: 1 1 auto;
+                text-align: center;
+            }
+            .custom-divider {
+                border-top: 2px solid #dee2e6;
+                margin: 1.5rem auto;
+                max-width: 95%;
+            }
+            [data-theme="dark"] .custom-divider {
+                border-top: 2px solid #6c757d;
+            }
+            .pagination-form {
+                max-width: 95%;
+                flex-direction: column;
+                gap: 0.4rem;
+            }
+            .pagination-form .stForm {
+                flex-direction: column;
+                align-items: center;
+            }
+            .pagination-form .stSelectbox {
+                max-width: 180px;
+            }
+            .notification-container {
+                width: 90%;
+                right: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main .block-container {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
+            h2 {
+                font-size: 1.4rem;
+            }
+            h3 {
+                font-size: 1.2rem;
+            }
+            .input-label {
+                font-size: 0.9rem;
+            }
+            .stButton>button, .stDownloadButton>button {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+                max-width: 160px;
+            }
+            .stSelectbox {
+                font-size: 0.85rem;
+                padding: 0.3rem;
+                max-width: 100%;
+                min-height: 36px;
+            }
+            .stTextArea {
+                font-size: 0.85rem;
+                padding: 0.3rem;
+                max-width: 100%;
+                min-height: 80px;
+            }
+            .stTabs [data-baseweb="tab"] {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+            .notification-container {
+                width: 95%;
             }
         }
     </style>
@@ -525,6 +535,7 @@ def load_incident_log():
             if 'Learner_Name' in df.columns and 'Learner_Full_Name' not in df.columns:
                 df = df.rename(columns={'Learner_Name': 'Learner_Full_Name'})
             df['Category'] = pd.to_numeric(df['Category'], errors='coerce').fillna(1).astype(int).astype(str)
+            df['Class'] = df['Class'].fillna('Onbekend').astype(str)
             df['Date'] = pd.to_datetime(df['Date'], errors='coerce').dt.date
             return df
         else:
@@ -806,18 +817,19 @@ incident_log = load_incident_log()
 with st.container():
     st.title("HOËRSKOOL SAUL DAMON")
     st.subheader("INSIDENT VERSLAG")
+
 # Add CSS for top-right notifications
 st.markdown("""
     <style>
         .notification-container {
             position: fixed;
-            top: 10px;
-            right: 10px;
-            width: 300px;
+            top: 1rem;
+            right: 1rem;
+            width: 280px;
             z-index: 1000;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 0.5rem;
         }
         [data-theme="dark"] .notification-container {
             background-color: transparent;
@@ -831,7 +843,6 @@ if 'sanction_popups' not in st.session_state:
 
 # Compute sanctions based on incident counts
 if not incident_log.empty:
-    # Tally incidents by learner and category
     tally_df = incident_log.pivot_table(
         index='Learner_Full_Name',
         columns='Category',
@@ -844,7 +855,6 @@ if not incident_log.empty:
             tally_df[cat] = 0
     tally_df = tally_df[['1', '2', '3', '4']].reset_index()
 
-    # Identify learners meeting sanction criteria
     sanctions = []
     for _, row in tally_df.iterrows():
         learner = row['Learner_Full_Name']
@@ -879,13 +889,11 @@ if not incident_log.empty:
 
     sanctions_df = pd.DataFrame(sanctions)
 
-    # Populate session state with new sanctions
     for _, row in sanctions_df.iterrows():
         key = f"{row['Learner']}_{row['Category']}"
         if key not in st.session_state.sanction_popups:
             st.session_state.sanction_popups[key] = True
 
-    # Display sanction notifications in top-right corner
     with st.container():
         st.markdown('<div class="notification-container">', unsafe_allow_html=True)
         any_notifications = False
@@ -918,7 +926,7 @@ if not incident_log.empty:
                 unsafe_allow_html=True
             )
         st.markdown('</div>', unsafe_allow_html=True)
-    # Former sidebar content: Report New Incident
+
     st.header("Rapporteer Nuwe Insident")
     with st.container():
         st.markdown('<div class="input-label">Leerder Naam</div>', unsafe_allow_html=True)
@@ -946,11 +954,10 @@ if not incident_log.empty:
             else:
                 st.error("Vul asseblief alle velde in en voer kommentaar in.")
 
-    # Former sidebar content: Generate Learner Report
     st.header("Genereer Leerder Verslag")
     with st.container():
         st.markdown('<div class="input-label">Kies Leerder vir Verslag</div>', unsafe_allow_html=True)
-        learner_report_name = st.selectbox("", options=['Kies'] + sorted(incident_log['Learner_Full_Name'].unique()), key="learner_report_name")
+        learner_report_name = st.selectbox("", options=['Kies'] + sorted(incident_log['Learner_Full_Name'].unique()) if not incident_log.empty else ['Kies'], key="learner_report_name")
         
         st.markdown('<div class="input-label">Kies Tydperk</div>', unsafe_allow_html=True)
         report_period = st.selectbox("", options=['Daagliks', 'Weekliks', 'Maandelik', 'Kwartaalliks'], key="report_period")
@@ -995,10 +1002,8 @@ if not incident_log.empty:
             else:
                 st.error("Kies asseblief 'n leerder.")
 
-    # Visual separator
     st.markdown('<div class="custom-divider"></div>', unsafe_allow_html=True)
 
-    # Original main content
     st.subheader("Insident Log")
     if not incident_log.empty:
         rows_per_page = 20
@@ -1008,7 +1013,6 @@ if not incident_log.empty:
         if 'incident_log_page' not in st.session_state:
             st.session_state.incident_log_page = 1
 
-        # Use a form to handle pagination buttons
         with st.form(key="pagination_form", clear_on_submit=False):
             col1, col2, col3 = st.columns([1, 2, 1])
             with col1:
@@ -1029,15 +1033,12 @@ if not incident_log.empty:
                 st.session_state.incident_log_page = selected_page
                 st.rerun()
 
-        # Calculate indices
         start_idx = (st.session_state.incident_log_page - 1) * rows_per_page
         end_idx = min(start_idx + rows_per_page, total_rows)
 
-        # Create display DataFrame with one-based index
         display_df = incident_log.iloc[start_idx:end_idx].copy()
         display_df.index = range(start_idx + 1, min(end_idx + 1, total_rows + 1))
 
-        # Display table
         st.dataframe(
             display_df,
             height=600,
@@ -1054,7 +1055,6 @@ if not incident_log.empty:
         )
         st.write(f"Wys {start_idx + 1} tot {end_idx} van {total_rows} insidente")
 
-        # Download full report
         st.download_button(
             label="Laai Verslag af as Word",
             data=generate_word_report(incident_log),
@@ -1062,7 +1062,6 @@ if not incident_log.empty:
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
 
-        # Delete incident
         st.write("Verwyder 'n Insident")
         one_based_indices = list(range(1, total_rows + 1))
         st.markdown('<div class="input-label">Kies Insident om te Verwyder (deur Indeks)</div>', unsafe_allow_html=True)
@@ -1150,19 +1149,29 @@ if not incident_log.empty:
     with tab1:
         st.subheader("Gefiltreerde Data")
         st.markdown('<div class="input-label">Filter Leerder Naam</div>', unsafe_allow_html=True)
-        filter_learner = st.selectbox("", options=['Alle'] + sorted(incident_log['Learner_Full_Name'].unique()), key="filter_learner")
+        learner_options = ['Alle'] + sorted(incident_log['Learner_Full_Name'].unique()) if not incident_log.empty else ['Alle']
+        filter_learner = st.selectbox("", options=learner_options, key="filter_learner")
         
         st.markdown('<div class="input-label">Filter Klas</div>', unsafe_allow_html=True)
-        filter_class = st.selectbox("", options=['Alle'] + sorted(incident_log['Class'].unique()), key="filter_class")
+        if not incident_log.empty:
+            class_options = incident_log['Class'].fillna('Onbekend').astype(str).unique()
+            class_options = [x for x in class_options if x]
+            class_options = sorted(class_options)
+        else:
+            class_options = []
+        filter_class = st.selectbox("", options=['Alle'] + class_options, key="filter_class")
         
         st.markdown('<div class="input-label">Filter Onderwyser</div>', unsafe_allow_html=True)
-        filter_teacher = st.selectbox("", options=['Alle'] + sorted(incident_log['Teacher'].unique()), key="filter_teacher")
+        teacher_options = ['Alle'] + sorted(incident_log['Teacher'].unique()) if not incident_log.empty else ['Alle']
+        filter_teacher = st.selectbox("", options=teacher_options, key="filter_teacher")
         
         st.markdown('<div class="input-label">Filter Insident</div>', unsafe_allow_html=True)
-        filter_incident = st.selectbox("", options=['Alle'] + sorted(incident_log['Incident'].unique()), key="filter_incident")
+        incident_options = ['Alle'] + sorted(incident_log['Incident'].unique()) if not incident_log.empty else ['Alle']
+        filter_incident = st.selectbox("", options=incident_options, key="filter_incident")
         
         st.markdown('<div class="input-label">Filter Kategorie</div>', unsafe_allow_html=True)
-        filter_category = st.selectbox("", options=['Alle'] + sorted(incident_log['Category'].unique(), key=lambda x: int(x)), key="filter_category")
+        category_options = ['Alle'] + sorted(incident_log['Category'].unique(), key=lambda x: int(x)) if not incident_log.empty else ['Alle']
+        filter_category = st.selectbox("", options=category_options, key="filter_category")
         
         filtered_df = incident_log.copy()
         if filter_learner != 'Alle':
@@ -1194,15 +1203,11 @@ if not incident_log.empty:
     with tab2:
         st.subheader("Weeklikse Opsomming")
         if not incident_log.empty:
-            # Convert 'Date' to datetime for grouping
             incident_log_dt = incident_log.copy()
             incident_log_dt['Date'] = pd.to_datetime(incident_log_dt['Date'])
-            # Create a pivot table for weekly incidents by category
             weekly_summary = incident_log_dt.groupby([pd.Grouper(key='Date', freq='W-MON'), 'Category']).size().unstack(fill_value=0)
             weekly_summary.index = weekly_summary.index.strftime('%Y-%m-%d')
-            # Add total incidents per week
             weekly_summary['Totaal'] = weekly_summary.sum(axis=1)
-            # Reset index to make 'Week Start' a column
             weekly_summary = weekly_summary.reset_index().rename(columns={'Date': 'Week Begin (Maandag)'})
             st.dataframe(
                 weekly_summary,
@@ -1213,12 +1218,10 @@ if not incident_log.empty:
                     'Totaal': st.column_config.NumberColumn("Totaal Insidente", width="small")
                 }
             )
-            # Display total incidents per week
             st.write("Totale Insidente per Week:")
             for idx, row in weekly_summary.iterrows():
                 st.write(f"Week van {row['Week Begin (Maandag)']}: {int(row['Totaal'])} insidente")
             
-            # Stacked bar chart for weekly incidents by category
             fig, ax = plt.subplots(figsize=(8, 4))
             weekly_summary.set_index('Week Begin (Maandag)')[weekly_summary.columns[1:-1]].plot(
                 kind='bar', 
@@ -1242,13 +1245,11 @@ if not incident_log.empty:
     with tab3:
         st.subheader("Maandelikse Opsomming")
         if not incident_log.empty:
-            # Convert 'Date' to datetime for grouping
             incident_log_dt = incident_log.copy()
             incident_log_dt['Date'] = pd.to_datetime(incident_log_dt['Date'])
             monthly_summary = incident_log_dt.groupby([pd.Grouper(key='Date', freq='M'), 'Category']).size().unstack(fill_value=0)
             monthly_summary.index = monthly_summary.index.strftime('%Y-%m')
             st.dataframe(monthly_summary, use_container_width=True, height=300)
-            # Stacked bar chart for monthly incidents by category
             fig, ax = plt.subplots(figsize=(8, 4))
             monthly_summary.plot(
                 kind='bar', 
@@ -1272,7 +1273,6 @@ if not incident_log.empty:
     with tab4:
         st.subheader("Kwartaallikse Opsomming")
         if not incident_log.empty:
-            # Convert 'Date' to datetime for grouping
             incident_log_dt = incident_log.copy()
             incident_log_dt['Date'] = pd.to_datetime(incident_log_dt['Date'])
             quarterly_summary = incident_log_dt.groupby([pd.Grouper(key='Date', freq='Q'), 'Category']).size().unstack(fill_value=0)
@@ -1280,7 +1280,6 @@ if not incident_log.empty:
                 lambda x: f"{x.year}-Q{(x.month-1)//3 + 1}"
             )
             st.dataframe(quarterly_summary, use_container_width=True, height=300)
-            # Stacked bar chart for quarterly incidents by category
             fig, ax = plt.subplots(figsize=(8, 4))
             quarterly_summary.plot(
                 kind='bar', 
@@ -1302,17 +1301,12 @@ if not incident_log.empty:
             st.write("Geen insidente om te wys nie.")
 
     st.subheader("Leerders met Herhalende Insidente")
-
-    # Count incidents per learner
     incident_counts = incident_log['Learner_Full_Name'].value_counts()
-    high_risk_learners = incident_counts[incident_counts > 2].index  # pas drempel aan soos nodig
-
-    # Filter incident log for high-risk learners
+    high_risk_learners = incident_counts[incident_counts > 2].index
     high_risk_df = incident_log[incident_log['Learner_Full_Name'].isin(high_risk_learners)]
 
     if not high_risk_df.empty:
         st.markdown("Hieronder is leerders met meer as twee insidente, aangedui as areas van kommer.")
-
         styled_html = """
         <style>
             .red-table {
@@ -1337,13 +1331,10 @@ if not incident_log.empty:
             }
         </style>
         """
-
-        # Build HTML table
         table_html = "<table class='red-table'><thead><tr>"
         for col in ['Leerder Naam', 'Klas', 'Insident', 'Kategorie', 'Datum']:
             table_html += f"<th>{col}</th>"
         table_html += "</tr></thead><tbody>"
-
         for _, row in high_risk_df.iterrows():
             table_html += "<tr>"
             table_html += f"<td>{row['Learner_Full_Name']}</td>"
@@ -1352,9 +1343,7 @@ if not incident_log.empty:
             table_html += f"<td>{row['Category']}</td>"
             table_html += f"<td>{row['Date']}</td>"
             table_html += "</tr>"
-
         table_html += "</tbody></table>"
-
         st.markdown(styled_html + table_html, unsafe_allow_html=True)
     else:
         st.info("Geen leerders met herhalende insidente is tans gemerk nie.")
