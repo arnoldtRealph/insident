@@ -418,35 +418,36 @@ def save_incident(learner_full_name, class_, teacher, incident, category, commen
 # Mark sanction as resolved and update GitHub
 def resolve_sanction(learner, category):
     incident_log = load_incident_log()
-    # Find all incidents for the learner and category and mark them as resolved
+    # Mark all incidents for this learner and category as resolved
     mask = (incident_log['Learner_Full_Name'] == learner) & (incident_log['Category'] == category)
-    incident_log.loc[mask, 'Sanction_Resolved'] = True
-    incident_log.to_csv("incident_log.csv", index=False)
+    if mask.any():
+        incident_log.loc[mask, 'Sanction_Resolved'] = True
+        incident_log.to_csv("incident_log.csv", index=False)
 
-    try:
-        g = Github(st.secrets["GITHUB_TOKEN"])
-        repo = g.get_repo("arnoldtRealph/insident")
-        with open("incident_log.csv", "rb") as file:
-            content = file.read()
-        repo_path = "incident_log.csv"
         try:
-            contents = repo.get_contents(repo_path, ref="master")
-            repo.update_file(
-                path=repo_path,
-                message="Updated incident_log.csv with resolved sanction",
-                content=content,
-                sha=contents.sha,
-                branch="master"
-            )
-        except:
-            repo.create_file(
-                path=repo_path,
-                message="Created incident_log.csv with resolved sanction",
-                content=content,
-                branch="master"
-            )
-    except Exception as e:
-        st.error(f"Kon nie na GitHub stoot nie: {e}")
+            g = Github(st.secrets["GITHUB_TOKEN"])
+            repo = g.get_repo("arnoldtRealph/insident")
+            with open("incident_log.csv", "rb") as file:
+                content = file.read()
+            repo_path = "incident_log.csv"
+            try:
+                contents = repo.get_contents(repo_path, ref="master")
+                repo.update_file(
+                    path=repo_path,
+                    message="Updated incident_log.csv with resolved sanction",
+                    content=content,
+                    sha=contents.sha,
+                    branch="master"
+                )
+            except:
+                repo.create_file(
+                    path=repo_path,
+                    message="Created incident_log.csv with resolved sanction",
+                    content=content,
+                    branch="master"
+                )
+        except Exception as e:
+            st.error(f"Kon nie na GitHub stoot nie: {e}")
 
     return incident_log
 
@@ -689,52 +690,35 @@ if not incident_log.empty:
     sanctions = []
     for _, row in tally_df.iterrows():
         learner = row['Learner_Full_Name']
-        if row['1'] > 10:
-            sanctions.append({
-                'Learner': learner,
-                'Category': '1',
-                'Count': int(row['1']),
-                'Sanction': 'Ouers moet afspraak maak met Mnr. Zealand.'
-            })
-        if row['2'] > 5:
-            sanctions.append({
-                'Learner': learner,
-                'Category': '2',
-                'Count': int(row['2']),
-                'Sanction': 'Ouers moet afspraak maak met Mnr. Zealand.'
-            })
-        if row['3'] > 2:
-            sanctions.append({
-                'Learner': learner,
-                'Category': '3',
-                'Count': int(row['3']),
-                'Sanction': 'Ouers moet afspraak maak met Mnr. Zealand.'
-            })
-        if row['4'] >= 1:
-            sanctions.append({
-                'Learner': learner,
-                'Category': '4',
-                'Count': int(row['4']),
-                'Sanction': 'Leerder moet geskors word.'
-            })
+        for cat in ['1', '2', '3', '4']:
+            count = int(row[cat])
+            if count > 0:  # Only consider categories with incidents
+                if cat == '1' and count > 10:
+                    sanction = 'Ouers moet afspraak maak met Mnr. Zealand.'
+                elif cat == '2' and count > 5:
+                    sanction = 'Ouers moet afspraak maak met Mnr. Zealand.'
+                elif cat == '3' and count > 2:
+                    sanction = 'Ouers moet afspraak maak met Mnr. Zealand.'
+                elif cat == '4' and count >= 1:
+                    sanction = 'Leerder moet geskors word.'
+                else:
+                    continue
+                # Check if all incidents for this learner and category are resolved
+                mask = (incident_log['Learner_Full_Name'] == learner) & (incident_log['Category'] == cat)
+                if not incident_log[mask]['Sanction_Resolved'].all():
+                    sanctions.append({
+                        'Learner': learner,
+                        'Category': cat,
+                        'Count': count,
+                        'Sanction': sanction
+                    })
 
     sanctions_df = pd.DataFrame(sanctions)
-    # Filter out resolved sanctions
-    unresolved_sanctions = []
-    for _, row in sanctions_df.iterrows():
-        learner = row['Learner']
-        category = row['Category']
-        # Check if any incident for this learner and category is unresolved
-        mask = (incident_log['Learner_Full_Name'] == learner) & (incident_log['Category'] == category)
-        if not incident_log[mask].empty and not incident_log[mask]['Sanction_Resolved'].all():
-            unresolved_sanctions.append(row)
-
-    unresolved_sanctions_df = pd.DataFrame(unresolved_sanctions)
 
     with st.container():
         st.markdown('<div class="notification-container">', unsafe_allow_html=True)
         any_notifications = False
-        for _, row in unresolved_sanctions_df.iterrows():
+        for _, row in sanctions_df.iterrows():
             learner = row['Learner']
             category = row['Category']
             any_notifications = True
