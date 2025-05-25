@@ -13,6 +13,7 @@ import uuid
 from github import Github
 import base64
 import os
+import time
 
 # Set seaborn style for lightweight charts
 sns.set_style("whitegrid")
@@ -357,7 +358,6 @@ def load_incident_log():
             df['Category'] = pd.to_numeric(df['Category'], errors='coerce').fillna(1).astype(int).astype(str)
             df['Class'] = df['Class'].fillna('Onbekend').astype(str)
             df['Date'] = pd.to_datetime(df['Date'], errors='coerce').dt.date
-            # Ensure Sanction_Resolved column exists
             if 'Sanction_Resolved' not in df.columns:
                 df['Sanction_Resolved'] = False
             df['Sanction_Resolved'] = df['Sanction_Resolved'].astype(bool)
@@ -383,10 +383,10 @@ def save_incident(learner_full_name, class_, teacher, incident, category, commen
         'Category': [category],
         'Comment': [comment],
         'Date': [datetime.now(sa_tz).date()],
-        'Sanction_Resolved': [False]  # Default to unresolved
+        'Sanction_Resolved': [False]
     })
-    incident_log = pd.concat([incident_log, new_incident], ignore_index=True)
-    incident_log.to_csv("incident_log.csv", index=False)
+    updated_log = pd.concat([incident_log, new_incident], ignore_index=True)
+    updated_log.to_csv("incident_log.csv", index=False)  # Save locally first
 
     try:
         g = Github(st.secrets["GITHUB_TOKEN"])
@@ -411,14 +411,15 @@ def save_incident(learner_full_name, class_, teacher, incident, category, commen
                 branch="master"
             )
     except Exception as e:
-        st.error(f"Kon nie na GitHub stoot nie: {e}")
+        with open("error_log.txt", "a") as f:
+            f.write(f"GitHub push failed: {str(e)}\n")
+        # Continue even if GitHub fails, as local save is primary
 
-    return incident_log
+    return updated_log  # Return updated log to refresh cache
 
 # Mark sanction as resolved and update GitHub
 def resolve_sanction(learner, category):
     incident_log = load_incident_log()
-    # Mark all incidents for this learner and category as resolved
     mask = (incident_log['Learner_Full_Name'] == learner) & (incident_log['Category'] == category)
     if mask.any():
         incident_log.loc[mask, 'Sanction_Resolved'] = True
@@ -447,7 +448,8 @@ def resolve_sanction(learner, category):
                     branch="master"
                 )
         except Exception as e:
-            st.error(f"Kon nie na GitHub stoot nie: {e}")
+            with open("error_log.txt", "a") as f:
+                f.write(f"GitHub push failed: {str(e)}\n")
 
     return incident_log
 
@@ -455,8 +457,8 @@ def resolve_sanction(learner, category):
 def clear_incident(index):
     incident_log = load_incident_log()
     if index in incident_log.index:
-        incident_log = incident_log.drop(index)
-        incident_log.to_csv("incident_log.csv", index=False)
+        updated_log = incident_log.drop(index)
+        updated_log.to_csv("incident_log.csv", index=False)
 
         try:
             g = Github(st.secrets["GITHUB_TOKEN"])
@@ -481,9 +483,10 @@ def clear_incident(index):
                     branch="master"
                 )
         except Exception as e:
-            st.error(f"Kon nie na GitHub stoot nie: {e}")
+            with open("error_log.txt", "a") as f:
+                f.write(f"GitHub push failed: {str(e)}\n")
 
-        return incident_log
+        return updated_log
     return incident_log
 
 # Generate Word document
@@ -516,7 +519,6 @@ def generate_word_report(df):
 
     doc.add_heading('Insident Analise', level=1)
     
-    # Simplified bar chart: Incidents by Category
     fig, ax = plt.subplots(figsize=(3, 2))
     category_counts = df['Category'].value_counts().sort_index()
     sns.barplot(x=category_counts.index, y=category_counts.values, ax=ax, palette='Blues')
@@ -531,9 +533,8 @@ def generate_word_report(df):
     plt.close()
     doc.add_picture(img_stream, width=Inches(3))
 
-    # Simplified bar chart: Incidents by Incident Type
     fig, ax = plt.subplots(figsize=(3, 2))
-    incident_counts = df['Incident'].value_counts().head(5)  # Limit to top 5 for performance
+    incident_counts = df['Incident'].value_counts().head(5)
     sns.barplot(x=incident_counts.index, y=incident_counts.values, ax=ax, palette='Blues')
     ax.set_title('Insidente volgens Tipe', fontsize=10)
     ax.set_xlabel('Insident', fontsize=8)
@@ -546,7 +547,6 @@ def generate_word_report(df):
     plt.close()
     doc.add_picture(img_stream, width=Inches(3))
 
-    # Simplified bar chart: Incidents by Teacher
     fig, ax = plt.subplots(figsize=(3, 2))
     teacher_counts = df['Teacher'].value_counts().head(5)
     sns.barplot(x=teacher_counts.index, y=teacher_counts.values, ax=ax, palette='Blues')
@@ -561,7 +561,6 @@ def generate_word_report(df):
     plt.close()
     doc.add_picture(img_stream, width=Inches(3))
 
-    # Simplified bar chart: Incidents by Class
     fig, ax = plt.subplots(figsize=(3, 2))
     class_counts = df['Class'].value_counts().head(5)
     sns.barplot(x=class_counts.index, y=class_counts.values, ax=ax, palette='Blues')
@@ -576,7 +575,6 @@ def generate_word_report(df):
     plt.close()
     doc.add_picture(img_stream, width=Inches(3))
 
-    # Simplified pie chart: Incident Distribution
     fig, ax = plt.subplots(figsize=(3, 2))
     category_counts.plot(kind='pie', ax=ax, autopct='%1.1f%%', colors=sns.color_palette('Blues'), textprops={'fontsize': 7})
     ax.set_title('Insident Verspreiding', fontsize=10)
@@ -586,7 +584,6 @@ def generate_word_report(df):
     plt.close()
     doc.add_picture(img_stream, width=Inches(3))
 
-    # High-Risk Learners
     doc.add_heading('Leerders met Herhalende Insidente', level=1)
     incident_counts = df['Learner_Full_Name'].value_counts()
     high_risk_learners = incident_counts[incident_counts > 2].index
@@ -692,7 +689,7 @@ if not incident_log.empty:
         learner = row['Learner_Full_Name']
         for cat in ['1', '2', '3', '4']:
             count = int(row[cat])
-            if count > 0:  # Only consider categories with incidents
+            if count > 0:
                 if cat == '1' and count > 10:
                     sanction = 'Ouers moet afspraak maak met Mnr. Zealand.'
                 elif cat == '2' and count > 5:
@@ -703,7 +700,6 @@ if not incident_log.empty:
                     sanction = 'Leerder moet geskors word.'
                 else:
                     continue
-                # Check if all incidents for this learner and category are resolved
                 mask = (incident_log['Learner_Full_Name'] == learner) & (incident_log['Category'] == cat)
                 if not incident_log[mask]['Sanction_Resolved'].all():
                     sanctions.append({
@@ -764,9 +760,8 @@ with st.container():
     st.markdown('<div class="input-label">Insident</div>', unsafe_allow_html=True)
     incident = st.selectbox("", options=['Kies'] + sorted(learner_df['Incident'].unique()), key="incident")
     
-    # Automatically set category based on incident type
     if incident != 'Kies':
-        default_category = INCIDENT_TO_CATEGORY.get(incident, "1")  # Default to Category 1 if not mapped
+        default_category = INCIDENT_TO_CATEGORY.get(incident, "1")
     else:
         default_category = "Kies"
     
@@ -784,6 +779,9 @@ with st.container():
     if st.button("Stoor Insident"):
         if learner_full_name != 'Kies' and class_ != 'Kies' and teacher != 'Kies' and incident != 'Kies' and category != 'Kies' and comment:
             incident_log = save_incident(learner_full_name, class_, teacher, incident, category, comment)
+            # Invalidate cache to ensure updated log is loaded
+            st.cache_data.clear()
+            incident_log = load_incident_log()  # Reload to reflect changes
             st.success("Insident suksesvol gestoor!")
             st.rerun()
         else:
