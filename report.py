@@ -346,7 +346,7 @@ def load_learner_data():
     df['Date'] = pd.to_datetime(date_range).date
     return df
 
-# Load or initialize incident log
+# Load or initialize incident log with Sanction_Resolved column
 @st.cache_data
 def load_incident_log():
     try:
@@ -357,11 +357,15 @@ def load_incident_log():
             df['Category'] = pd.to_numeric(df['Category'], errors='coerce').fillna(1).astype(int).astype(str)
             df['Class'] = df['Class'].fillna('Onbekend').astype(str)
             df['Date'] = pd.to_datetime(df['Date'], errors='coerce').dt.date
+            # Ensure Sanction_Resolved column exists
+            if 'Sanction_Resolved' not in df.columns:
+                df['Sanction_Resolved'] = False
+            df['Sanction_Resolved'] = df['Sanction_Resolved'].astype(bool)
             return df
         else:
-            return pd.DataFrame(columns=['Learner_Full_Name', 'Class', 'Teacher', 'Incident', 'Category', 'Comment', 'Date'])
+            return pd.DataFrame(columns=['Learner_Full_Name', 'Class', 'Teacher', 'Incident', 'Category', 'Comment', 'Date', 'Sanction_Resolved'])
     except (FileNotFoundError, pd.errors.EmptyDataError):
-        return pd.DataFrame(columns=['Learner_Full_Name', 'Class', 'Teacher', 'Incident', 'Category', 'Comment', 'Date'])
+        return pd.DataFrame(columns=['Learner_Full_Name', 'Class', 'Teacher', 'Incident', 'Category', 'Comment', 'Date', 'Sanction_Resolved'])
 
 # Save incident to log and push to GitHub
 def save_incident(learner_full_name, class_, teacher, incident, category, comment):
@@ -375,10 +379,11 @@ def save_incident(learner_full_name, class_, teacher, incident, category, commen
         'Learner_Full_Name': [learner_full_name],
         'Class': [class_],
         'Teacher': [teacher],
-        'Incident': [incident],  # Store the incident type directly
+        'Incident': [incident],
         'Category': [category],
         'Comment': [comment],
-        'Date': [datetime.now(sa_tz).date()]
+        'Date': [datetime.now(sa_tz).date()],
+        'Sanction_Resolved': [False]  # Default to unresolved
     })
     incident_log = pd.concat([incident_log, new_incident], ignore_index=True)
     incident_log.to_csv("incident_log.csv", index=False)
@@ -402,6 +407,41 @@ def save_incident(learner_full_name, class_, teacher, incident, category, commen
             repo.create_file(
                 path=repo_path,
                 message="Created incident_log.csv with new incident",
+                content=content,
+                branch="master"
+            )
+    except Exception as e:
+        st.error(f"Kon nie na GitHub stoot nie: {e}")
+
+    return incident_log
+
+# Mark sanction as resolved and update GitHub
+def resolve_sanction(learner, category):
+    incident_log = load_incident_log()
+    # Find all incidents for the learner and category and mark them as resolved
+    mask = (incident_log['Learner_Full_Name'] == learner) & (incident_log['Category'] == category)
+    incident_log.loc[mask, 'Sanction_Resolved'] = True
+    incident_log.to_csv("incident_log.csv", index=False)
+
+    try:
+        g = Github(st.secrets["GITHUB_TOKEN"])
+        repo = g.get_repo("arnoldtRealph/insident")
+        with open("incident_log.csv", "rb") as file:
+            content = file.read()
+        repo_path = "incident_log.csv"
+        try:
+            contents = repo.get_contents(repo_path, ref="master")
+            repo.update_file(
+                path=repo_path,
+                message="Updated incident_log.csv with resolved sanction",
+                content=content,
+                sha=contents.sha,
+                branch="master"
+            )
+        except:
+            repo.create_file(
+                path=repo_path,
+                message="Created incident_log.csv with resolved sanction",
                 content=content,
                 branch="master"
             )
@@ -632,10 +672,6 @@ with st.container():
     st.title("HOËRSKOOL SAUL DAMON")
     st.subheader("INSIDENT VERSLAG")
 
-# Notification container
-if 'sanction_popups' not in st.session_state:
-    st.session_state.sanction_popups = {}
-
 # Compute sanctions
 if not incident_log.empty:
     tally_df = incident_log.pivot_table(
@@ -683,33 +719,41 @@ if not incident_log.empty:
             })
 
     sanctions_df = pd.DataFrame(sanctions)
+    # Filter out resolved sanctions
+    unresolved_sanctions = []
     for _, row in sanctions_df.iterrows():
-        key = f"{row['Learner']}_{row['Category']}"
-        if key not in st.session_state.sanction_popups:
-            st.session_state.sanction_popups[key] = True
+        learner = row['Learner']
+        category = row['Category']
+        # Check if any incident for this learner and category is unresolved
+        mask = (incident_log['Learner_Full_Name'] == learner) & (incident_log['Category'] == category)
+        if not incident_log[mask].empty and not incident_log[mask]['Sanction_Resolved'].all():
+            unresolved_sanctions.append(row)
+
+    unresolved_sanctions_df = pd.DataFrame(unresolved_sanctions)
 
     with st.container():
         st.markdown('<div class="notification-container">', unsafe_allow_html=True)
         any_notifications = False
-        for _, row in sanctions_df.iterrows():
-            key = f"{row['Learner']}_{row['Category']}"
-            if st.session_state.sanction_popups.get(key, False):
-                any_notifications = True
-                st.markdown(
-                    f"""
-                    <div style='background-color: #ffe6e6; padding: 10px; border-radius: 6px; border: 1px solid #cc0000;'>
-                        <h4 style='color: #cc0000; margin: 0; font-size: 1rem;'>SANKSIEMELDING</h4>
-                        <p style='color: #333; margin: 3px 0; font-size: 0.85rem;'>
-                            Leerder <strong>{row['Learner']}</strong>: {row['Count']} Kategorie {row['Category']} insidente. 
-                            Sanksie: {row['Sanction']}
-                        </p>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-                if st.button("Opgelos", key=f"sanction_resolve_{key}"):
-                    st.session_state.sanction_popups[key] = False
-                    st.rerun()
+        for _, row in unresolved_sanctions_df.iterrows():
+            learner = row['Learner']
+            category = row['Category']
+            any_notifications = True
+            st.markdown(
+                f"""
+                <div style='background-color: #ffe6e6; padding: 10px; border-radius: 6px; border: 1px solid #cc0000;'>
+                    <h4 style='color: #cc0000; margin: 0; font-size: 1rem;'>SANKSIEMELDING</h4>
+                    <p style='color: #333; margin: 3px 0; font-size: 0.85rem;'>
+                        Leerder <strong>{row['Learner']}</strong>: {row['Count']} Kategorie {row['Category']} insidente. 
+                        Sanksie: {row['Sanction']}
+                    </p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+            if st.button("Opgelos", key=f"sanction_resolve_{learner}_{category}"):
+                incident_log = resolve_sanction(learner, category)
+                st.success("Sanksie permanent opgelos!")
+                st.rerun()
         if not any_notifications:
             st.markdown(
                 """
@@ -859,7 +903,8 @@ if not incident_log.empty:
             "Incident": st.column_config.TextColumn("Insident", width="medium"),
             "Category": st.column_config.TextColumn("Kategorie", width="small"),
             "Comment": st.column_config.TextColumn("Kommentaar", width="large"),
-            "Date": st.column_config.DateColumn("Datum", width="medium", format="YYYY-MM-DD")
+            "Date": st.column_config.DateColumn("Datum", width="medium", format="YYYY-MM-DD"),
+            "Sanction_Resolved": st.column_config.CheckboxColumn("Sanksie Opgelos", width="small")
         }
     )
     st.write(f"Wys {start_idx + 1} tot {end_idx} van {total_rows} insidente")
@@ -997,7 +1042,8 @@ with tab1:
             "Incident": st.column_config.TextColumn("Insident", width="medium"),
             "Category": st.column_config.TextColumn("Kategorie", width="small"),
             "Comment": st.column_config.TextColumn("Kommentaar", width="large"),
-            "Date": st.column_config.DateColumn("Datum", width="medium", format="YYYY-MM-DD")
+            "Date": st.column_config.DateColumn("Datum", width="medium", format="YYYY-MM-DD"),
+            "Sanction_Resolved": st.column_config.CheckboxColumn("Sanksie Opgelos", width="small")
         }
     )
     st.write(f"Totale Insidente: {len(filtered_df)}")
@@ -1110,7 +1156,8 @@ if not high_risk_df.empty:
         'Incident': 'Insident',
         'Category': 'Kategorie',
         'Comment': 'Kommentaar',
-        'Date': 'Datum'
+        'Date': 'Datum',
+        'Sanction_Resolved': 'Sanksie Opgelos'
     })
     st.dataframe(
         display_df,
@@ -1122,7 +1169,8 @@ if not high_risk_df.empty:
             "Insident": st.column_config.TextColumn("Insident", width="medium"),
             "Kategorie": st.column_config.TextColumn("Kategorie", width="small"),
             "Kommentaar": st.column_config.TextColumn("Kommentaar", width="large"),
-            "Datum": st.column_config.DateColumn("Datum", width="medium", format="YYYY-MM-DD")
+            "Datum": st.column_config.DateColumn("Datum", width="medium", format="YYYY-MM-DD"),
+            "Sanksie Opgelos": st.column_config.CheckboxColumn("Sanksie Opgelos", width="small")
         }
     )
 else:
