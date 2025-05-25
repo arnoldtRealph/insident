@@ -870,7 +870,7 @@ if not incident_log.empty:
     end_idx = min(start_idx + rows_per_page, total_rows)
 
     display_df = incident_log.iloc[start_idx:end_idx].copy()
-    display_df.index = range(1, end_idx - start_idx + 1)  # Start index at 1 for display
+    display_df.index = range(start_idx + 1, end_idx + 1)  # Continuous 1-based index
 
     st.dataframe(
         display_df,
@@ -897,7 +897,7 @@ if not incident_log.empty:
     )
 
     st.write("Verwyder 'n Insident")
-    one_based_indices = list(range(1, total_rows + 1))  # Indices start at 1
+    one_based_indices = list(range(1, total_rows + 1))  # Continuous 1-based indices
     st.markdown('<div class="input-label">Kies Insident om te Verwyder (deur Indeks)</div>', unsafe_allow_html=True)
     selected_display_index = st.selectbox("", options=one_based_indices, key="delete_index")
     if st.button("Verwyder Insident"):
