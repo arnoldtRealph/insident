@@ -456,7 +456,7 @@ def resolve_sanction(learner, category):
 def clear_incident(index):
     incident_log = load_incident_log()
     if 0 <= index < len(incident_log):
-        updated_log = incident_log.drop(index)
+        updated_log = incident_log.drop(index).reset_index(drop=True)
         updated_log.to_csv("incident_log.csv", index=False)
 
         try:
@@ -902,12 +902,11 @@ if not incident_log.empty:
     selected_display_index = st.selectbox("", options=one_based_indices, key="delete_index")
     if st.button("Verwyder Insident"):
         if 1 <= selected_display_index <= total_rows:
-            zero_based_index = selected_display_index - 1
-            global_index = start_idx + zero_based_index  # Adjust for paginated view
+            global_index = selected_display_index - 1  # Direct 0-based index from 1-based selection
             if 0 <= global_index < len(incident_log):
                 incident_log = clear_incident(global_index)
                 st.cache_data.clear()
-                incident_log = load_incident_log()
+                incident_log = load_incident_log()  # Reload to reflect changes
                 st.success(f"Insident {selected_display_index} suksesvol verwyder!")
                 total_rows = len(incident_log)
                 total_pages = (total_rows + rows_per_page - 1) // rows_per_page
@@ -917,7 +916,7 @@ if not incident_log.empty:
                     st.session_state.incident_log_page = 1
                 st.rerun()
             else:
-                st.error("Gekose indeks is ongeldig.")
+                st.error("Gekose indeks is ongeldig. Kontroleer die insident log.")
         else:
             st.error("Gekose indeks is buite bereik.")
 
