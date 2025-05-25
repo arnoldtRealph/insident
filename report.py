@@ -386,7 +386,7 @@ def save_incident(learner_full_name, class_, teacher, incident, category, commen
         'Sanction_Resolved': [False]
     })
     updated_log = pd.concat([incident_log, new_incident], ignore_index=True)
-    updated_log.to_csv("incident_log.csv", index=False)  # Save locally first
+    updated_log.to_csv("incident_log.csv", index=False)
 
     try:
         g = Github(st.secrets["GITHUB_TOKEN"])
@@ -413,9 +413,8 @@ def save_incident(learner_full_name, class_, teacher, incident, category, commen
     except Exception as e:
         with open("error_log.txt", "a") as f:
             f.write(f"GitHub push failed: {str(e)}\n")
-        # Continue even if GitHub fails, as local save is primary
 
-    return updated_log  # Return updated log to refresh cache
+    return updated_log
 
 # Mark sanction as resolved and update GitHub
 def resolve_sanction(learner, category):
@@ -456,7 +455,7 @@ def resolve_sanction(learner, category):
 # Clear a single incident and push to GitHub
 def clear_incident(index):
     incident_log = load_incident_log()
-    if index in incident_log.index:
+    if 0 <= index < len(incident_log):
         updated_log = incident_log.drop(index)
         updated_log.to_csv("incident_log.csv", index=False)
 
@@ -779,9 +778,8 @@ with st.container():
     if st.button("Stoor Insident"):
         if learner_full_name != 'Kies' and class_ != 'Kies' and teacher != 'Kies' and incident != 'Kies' and category != 'Kies' and comment:
             incident_log = save_incident(learner_full_name, class_, teacher, incident, category, comment)
-            # Invalidate cache to ensure updated log is loaded
             st.cache_data.clear()
-            incident_log = load_incident_log()  # Reload to reflect changes
+            incident_log = load_incident_log()
             st.success("Insident suksesvol gestoor!")
             st.rerun()
         else:
@@ -872,7 +870,7 @@ if not incident_log.empty:
     end_idx = min(start_idx + rows_per_page, total_rows)
 
     display_df = incident_log.iloc[start_idx:end_idx].copy()
-    display_df.index = range(start_idx + 1, min(end_idx + 1, total_rows + 1))
+    display_df.index = range(start_idx, end_idx)
 
     st.dataframe(
         display_df,
@@ -903,16 +901,26 @@ if not incident_log.empty:
     st.markdown('<div class="input-label">Kies Insident om te Verwyder (deur Indeks)</div>', unsafe_allow_html=True)
     selected_display_index = st.selectbox("", options=one_based_indices, key="delete_index")
     if st.button("Verwyder Insident"):
-        zero_based_index = selected_display_index - 1
-        incident_log = clear_incident(zero_based_index)
-        st.success(f"Insident {selected_display_index} suksesvol verwyder!")
-        total_rows = len(incident_log)
-        total_pages = (total_rows + rows_per_page - 1) // rows_per_page
-        if st.session_state.incident_log_page > total_pages and total_pages > 0:
-            st.session_state.incident_log_page = total_pages
-        elif total_pages == 0:
-            st.session_state.incident_log_page = 1
-        st.rerun()
+        if 1 <= selected_display_index <= total_rows:
+            zero_based_index = selected_display_index - 1
+            global_index = start_idx + zero_based_index  # Adjust for paginated view
+            if 0 <= global_index < len(incident_log):
+                incident_log = clear_incident(global_index)
+                st.cache_data.clear()
+                incident_log = load_incident_log()
+                st.success(f"Insident {selected_display_index} suksesvol verwyder!")
+                total_rows = len(incident_log)
+                total_pages = (total_rows + rows_per_page - 1) // rows_per_page
+                if st.session_state.incident_log_page > total_pages and total_pages > 0:
+                    st.session_state.incident_log_page = total_pages
+                elif total_pages == 0:
+                    st.session_state.incident_log_page = 1
+                st.rerun()
+            else:
+                st.error("Gekose indeks is ongeldig.")
+        else:
+            st.error("Gekose indeks is buite bereik.")
+
 else:
     st.write("Geen insidente in die log nie.")
 
