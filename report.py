@@ -25,7 +25,7 @@ plt.rcParams['ytick.labelsize'] = 7
 # Set page config
 st.set_page_config(page_title="Insident Verslag", layout="wide")
 
-# Simplified CSS for mobile optimization (unchanged from previous)
+# Simplified CSS for mobile optimization
 st.markdown("""
     <style>
         /* General layout */
@@ -230,25 +230,6 @@ st.markdown("""
             z-index: 1000;
         }
 
-        /* Red table styling */
-        .red-table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-top: 10px;
-            background-color: #ffcccc;
-            color: #000;
-            font-size: 0.85rem;
-        }
-        .red-table th {
-            background-color: #cc0000;
-            color: white;
-            padding: 8px;
-        }
-        .red-table td {
-            padding: 8px;
-            border: 1px solid #990000;
-        }
-
         /* Mobile optimization */
         @media (max-width: 768px) {
             .main .block-container {
@@ -281,10 +262,6 @@ st.markdown("""
                 flex-direction: column;
                 align-items: center;
             }
-            .red-table th, .red-table td {
-                padding: 6px;
-                font-size: 0.8rem;
-            }
         }
 
         @media (max-width: 480px) {
@@ -304,13 +281,44 @@ st.markdown("""
                 font-size: 0.8rem;
                 padding: 0.25rem;
             }
-            .red-table th, .red-table td {
-                padding: 5px;
-                font-size: 0.75rem;
-            }
         }
     </style>
 """, unsafe_allow_html=True)
+
+# Mapping of incidents to categories based on the Code of Conduct
+INCIDENT_TO_CATEGORY = {
+    # Category 1: Minor offenses
+    "Strooi van vullis": "1",
+    "Eet in klas": "1",
+    "Onnet voorkoms": "1",
+    "Ontwrigtende gedrag in die klas": "1",
+    "Wangedrag tydens samekoms": "1",
+    "Betreding van verbode area": "1",
+    # Category 2: Moderate offenses
+    "Dros": "2",
+    "Laatkom": "2",
+    "Plagiaat": "2",
+    "Baklei": "2",
+    "Rook": "2",
+    "Beskadiging van eiendom": "2",
+    "Bedreiging": "2",
+    # Category 3: Serious offenses
+    "Boelie": "3",
+    "Seksuele teistering": "3",
+    "Rassistiese opmerkings": "3",
+    "Dwelmverbruik": "3",
+    "Onder invloed van alkohol": "3",
+    "Afkyk in eksamen": "3",
+    # Category 4: Severe offenses
+    "Aanranding": "4",
+    "Diefstal": "4",
+    "Dwelmverkoop": "4",
+    "Gevaarlike wapens": "4",
+    "Pornografie": "4",
+    "Vervalsing": "4",
+    # Default for unmapped incidents (can be adjusted manually)
+    "Onbekend": "1"
+}
 
 # Load and preprocess learner data
 @st.cache_data
@@ -367,7 +375,7 @@ def save_incident(learner_full_name, class_, teacher, incident, category, commen
         'Learner_Full_Name': [learner_full_name],
         'Class': [class_],
         'Teacher': [teacher],
-        'Incident': 'Incident',
+        'Incident': [incident],  # Store the incident type directly
         'Category': [category],
         'Comment': [comment],
         'Date': [datetime.now(sa_tz).date()]
@@ -728,8 +736,19 @@ with st.container():
     st.markdown('<div class="input-label">Insident</div>', unsafe_allow_html=True)
     incident = st.selectbox("", options=['Kies'] + sorted(learner_df['Incident'].unique()), key="incident")
     
-    st.markdown('<div class="input-label">Kategorie</div>', unsafe_allow_html=True)
-    category = st.selectbox("", options=['Kies'] + sorted(learner_df['Category'].unique(), key=lambda x: int(x)), key="category")
+    # Automatically set category based on incident type
+    if incident != 'Kies':
+        default_category = INCIDENT_TO_CATEGORY.get(incident, "1")  # Default to Category 1 if not mapped
+    else:
+        default_category = "Kies"
+    
+    st.markdown('<div class="input-label">Kategorie (Outomaties Gekies, Kan Verander Word)</div>', unsafe_allow_html=True)
+    category = st.selectbox(
+        "",
+        options=['Kies'] + sorted(learner_df['Category'].unique(), key=lambda x: int(x)),
+        index=0 if default_category == "Kies" else sorted(learner_df['Category'].unique(), key=lambda x: int(x)).index(default_category) + 1,
+        key="category"
+    )
     
     st.markdown('<div class="input-label">Kommentaar</div>', unsafe_allow_html=True)
     comment = st.text_area("", placeholder="Tik hier...", key="comment")
@@ -1084,7 +1103,6 @@ high_risk_df = incident_log[incident_log['Learner_Full_Name'].isin(high_risk_lea
 
 if not high_risk_df.empty:
     st.markdown("Leerders met meer as twee insidente:")
-    # Use st.dataframe instead of HTML to ensure proper table rendering
     display_df = high_risk_df.rename(columns={
         'Learner_Full_Name': 'Leerder Naam',
         'Class': 'Klas',
@@ -1094,7 +1112,6 @@ if not high_risk_df.empty:
         'Comment': 'Kommentaar',
         'Date': 'Datum'
     })
-    # Apply custom styling using Streamlit's dataframe styling
     st.dataframe(
         display_df,
         use_container_width=True,
